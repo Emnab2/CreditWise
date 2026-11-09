@@ -1,0 +1,488 @@
+{
+  "date_reference": "2026-08-06 09:13:00",
+  "seuil_surendettement": 1,
+  "surendettement_1": 66,
+  "tailles": {
+    "entrainement": 2212,
+    "test": 738,
+    "mis_de_cote": 20
+  },
+  "repartition": {
+    "entrainement": [
+      1501,
+      711
+    ],
+    "test": [
+      500,
+      238
+    ],
+    "mis_de_cote": [
+      12,
+      8
+    ]
+  },
+  "ids_mis_de_cote": [
+    2399,
+    1222,
+    2404,
+    332,
+    1477,
+    1912,
+    460,
+    192,
+    2943,
+    439,
+    463,
+    1353,
+    246,
+    2419,
+    93,
+    2488,
+    1789,
+    1508,
+    1802,
+    144
+  ],
+  "resultats": {
+    "Random Forest": {
+      "normalise": false,
+      "test": {
+        "accuracy": 1.0,
+        "precision_accord": 1.0,
+        "rappel_accord": 1.0,
+        "f1_accord": 1.0,
+        "precision_refus": 1.0,
+        "rappel_refus": 1.0,
+        "f1_refus": 1.0,
+        "precision_macro": 1.0,
+        "rappel_macro": 1.0,
+        "f1_macro": 1.0,
+        "effectifs": [
+          500,
+          238
+        ],
+        "matrice": [
+          [
+            500,
+            0
+          ],
+          [
+            0,
+            238
+          ]
+        ]
+      },
+      "mis_de_cote": {
+        "accuracy": 1.0,
+        "precision_accord": 1.0,
+        "rappel_accord": 1.0,
+        "f1_accord": 1.0,
+        "precision_refus": 1.0,
+        "rappel_refus": 1.0,
+        "f1_refus": 1.0,
+        "precision_macro": 1.0,
+        "rappel_macro": 1.0,
+        "f1_macro": 1.0,
+        "effectifs": [
+          12,
+          8
+        ],
+        "matrice": [
+          [
+            12,
+            0
+          ],
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    },
+    "SVM (noyau RBF)": {
+      "normalise": true,
+      "test": {
+        "accuracy": 0.9769647696476965,
+        "precision_accord": 0.9585062240663901,
+        "rappel_accord": 0.9705882352941176,
+        "f1_accord": 0.964509394572025,
+        "precision_refus": 0.9859154929577465,
+        "rappel_refus": 0.98,
+        "f1_refus": 0.9829488465396189,
+        "precision_macro": 0.9722108585120683,
+        "rappel_macro": 0.9752941176470589,
+        "f1_macro": 0.973729120555822,
+        "effectifs": [
+          500,
+          238
+        ],
+        "matrice": [
+          [
+            490,
+            10
+          ],
+          [
+            7,
+            231
+          ]
+        ]
+      },
+      "mis_de_cote": {
+        "accuracy": 1.0,
+        "precision_accord": 1.0,
+        "rappel_accord": 1.0,
+        "f1_accord": 1.0,
+        "precision_refus": 1.0,
+        "rappel_refus": 1.0,
+        "f1_refus": 1.0,
+        "precision_macro": 1.0,
+        "rappel_macro": 1.0,
+        "f1_macro": 1.0,
+        "effectifs": [
+          12,
+          8
+        ],
+        "matrice": [
+          [
+            12,
+            0
+          ],
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    },
+    "KNN (k = 5)": {
+      "normalise": true,
+      "test": {
+        "accuracy": 0.940379403794038,
+        "precision_accord": 0.9041666666666667,
+        "rappel_accord": 0.9117647058823529,
+        "f1_accord": 0.9079497907949791,
+        "precision_refus": 0.9578313253012049,
+        "rappel_refus": 0.954,
+        "f1_refus": 0.9559118236472945,
+        "precision_macro": 0.9309989959839358,
+        "rappel_macro": 0.9328823529411765,
+        "f1_macro": 0.9319308072211367,
+        "effectifs": [
+          500,
+          238
+        ],
+        "matrice": [
+          [
+            477,
+            23
+          ],
+          [
+            21,
+            217
+          ]
+        ]
+      },
+      "mis_de_cote": {
+        "accuracy": 0.95,
+        "precision_accord": 1.0,
+        "rappel_accord": 0.875,
+        "f1_accord": 0.9333333333333333,
+        "precision_refus": 0.9230769230769231,
+        "rappel_refus": 1.0,
+        "f1_refus": 0.96,
+        "precision_macro": 0.9615384615384616,
+        "rappel_macro": 0.9375,
+        "f1_macro": 0.9466666666666667,
+        "effectifs": [
+          12,
+          8
+        ],
+        "matrice": [
+          [
+            12,
+            0
+          ],
+          [
+            1,
+            7
+          ]
+        ]
+      }
+    },
+    "Arbre de décision": {
+      "normalise": false,
+      "test": {
+        "accuracy": 1.0,
+        "precision_accord": 1.0,
+        "rappel_accord": 1.0,
+        "f1_accord": 1.0,
+        "precision_refus": 1.0,
+        "rappel_refus": 1.0,
+        "f1_refus": 1.0,
+        "precision_macro": 1.0,
+        "rappel_macro": 1.0,
+        "f1_macro": 1.0,
+        "effectifs": [
+          500,
+          238
+        ],
+        "matrice": [
+          [
+            500,
+            0
+          ],
+          [
+            0,
+            238
+          ]
+        ]
+      },
+      "mis_de_cote": {
+        "accuracy": 1.0,
+        "precision_accord": 1.0,
+        "rappel_accord": 1.0,
+        "f1_accord": 1.0,
+        "precision_refus": 1.0,
+        "rappel_refus": 1.0,
+        "f1_refus": 1.0,
+        "precision_macro": 1.0,
+        "rappel_macro": 1.0,
+        "f1_macro": 1.0,
+        "effectifs": [
+          12,
+          8
+        ],
+        "matrice": [
+          [
+            12,
+            0
+          ],
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    },
+    "Naive Bayes (gaussien)": {
+      "normalise": false,
+      "test": {
+        "accuracy": 0.9661246612466124,
+        "precision_accord": 0.9650655021834061,
+        "rappel_accord": 0.9285714285714286,
+        "f1_accord": 0.9464668094218416,
+        "precision_refus": 0.9666011787819253,
+        "rappel_refus": 0.984,
+        "f1_refus": 0.9752229930624381,
+        "precision_macro": 0.9658333404826658,
+        "rappel_macro": 0.9562857142857143,
+        "f1_macro": 0.9608449012421398,
+        "effectifs": [
+          500,
+          238
+        ],
+        "matrice": [
+          [
+            492,
+            8
+          ],
+          [
+            17,
+            221
+          ]
+        ]
+      },
+      "mis_de_cote": {
+        "accuracy": 1.0,
+        "precision_accord": 1.0,
+        "rappel_accord": 1.0,
+        "f1_accord": 1.0,
+        "precision_refus": 1.0,
+        "rappel_refus": 1.0,
+        "f1_refus": 1.0,
+        "precision_macro": 1.0,
+        "rappel_macro": 1.0,
+        "f1_macro": 1.0,
+        "effectifs": [
+          12,
+          8
+        ],
+        "matrice": [
+          [
+            12,
+            0
+          ],
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    },
+    "Perceptron": {
+      "normalise": true,
+      "test": {
+        "accuracy": 0.9566395663956639,
+        "precision_accord": 0.9439655172413793,
+        "rappel_accord": 0.9201680672268907,
+        "f1_accord": 0.9319148936170213,
+        "precision_refus": 0.9624505928853755,
+        "rappel_refus": 0.974,
+        "f1_refus": 0.9681908548707754,
+        "precision_macro": 0.9532080550633775,
+        "rappel_macro": 0.9470840336134454,
+        "f1_macro": 0.9500528742438983,
+        "effectifs": [
+          500,
+          238
+        ],
+        "matrice": [
+          [
+            487,
+            13
+          ],
+          [
+            19,
+            219
+          ]
+        ]
+      },
+      "mis_de_cote": {
+        "accuracy": 1.0,
+        "precision_accord": 1.0,
+        "rappel_accord": 1.0,
+        "f1_accord": 1.0,
+        "precision_refus": 1.0,
+        "rappel_refus": 1.0,
+        "f1_refus": 1.0,
+        "precision_macro": 1.0,
+        "rappel_macro": 1.0,
+        "f1_macro": 1.0,
+        "effectifs": [
+          12,
+          8
+        ],
+        "matrice": [
+          [
+            12,
+            0
+          ],
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    },
+    "Régression logistique": {
+      "normalise": true,
+      "test": {
+        "accuracy": 0.9742547425474255,
+        "precision_accord": 0.9581589958158996,
+        "rappel_accord": 0.9621848739495799,
+        "f1_accord": 0.960167714884696,
+        "precision_refus": 0.9819639278557114,
+        "rappel_refus": 0.98,
+        "f1_refus": 0.980980980980981,
+        "precision_macro": 0.9700614618358054,
+        "rappel_macro": 0.97109243697479,
+        "f1_macro": 0.9705743479328385,
+        "effectifs": [
+          500,
+          238
+        ],
+        "matrice": [
+          [
+            490,
+            10
+          ],
+          [
+            9,
+            229
+          ]
+        ]
+      },
+      "mis_de_cote": {
+        "accuracy": 1.0,
+        "precision_accord": 1.0,
+        "rappel_accord": 1.0,
+        "f1_accord": 1.0,
+        "precision_refus": 1.0,
+        "rappel_refus": 1.0,
+        "f1_refus": 1.0,
+        "precision_macro": 1.0,
+        "rappel_macro": 1.0,
+        "f1_macro": 1.0,
+        "effectifs": [
+          12,
+          8
+        ],
+        "matrice": [
+          [
+            12,
+            0
+          ],
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    },
+    "SGD Classifier": {
+      "normalise": true,
+      "test": {
+        "accuracy": 0.9566395663956639,
+        "precision_accord": 0.9186991869918699,
+        "rappel_accord": 0.9495798319327731,
+        "f1_accord": 0.9338842975206612,
+        "precision_refus": 0.975609756097561,
+        "rappel_refus": 0.96,
+        "f1_refus": 0.967741935483871,
+        "precision_macro": 0.9471544715447154,
+        "rappel_macro": 0.9547899159663865,
+        "f1_macro": 0.9508131165022661,
+        "effectifs": [
+          500,
+          238
+        ],
+        "matrice": [
+          [
+            480,
+            20
+          ],
+          [
+            12,
+            226
+          ]
+        ]
+      },
+      "mis_de_cote": {
+        "accuracy": 1.0,
+        "precision_accord": 1.0,
+        "rappel_accord": 1.0,
+        "f1_accord": 1.0,
+        "precision_refus": 1.0,
+        "rappel_refus": 1.0,
+        "f1_refus": 1.0,
+        "precision_macro": 1.0,
+        "rappel_macro": 1.0,
+        "f1_macro": 1.0,
+        "effectifs": [
+          12,
+          8
+        ],
+        "matrice": [
+          [
+            12,
+            0
+          ],
+          [
+            0,
+            8
+          ]
+        ]
+      }
+    }
+  }
+}

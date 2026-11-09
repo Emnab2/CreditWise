@@ -1,0 +1,438 @@
+{
+  "explainer": "shap.KernelExplainer(clf_nb.predict_proba, background_features)",
+  "modele": "GaussianNB",
+  "modele_lignes_entrainement": 1782,
+  "background_fichier": "bd_validation.csv",
+  "background_lignes": 20,
+  "background_repartition_reelle": {
+    "refus": 12,
+    "accord": 8
+  },
+  "valeur_de_base_accord": 0.3871073425366684,
+  "versions": {
+    "shap": "0.52.0"
+  },
+  "global_identique_a_static_summary_plot": true,
+  "classement_global": [
+    {
+      "rang": 1,
+      "variable": "retard",
+      "libelle": "Retards de paiement",
+      "moyenne_abs_shap": 0.31579512109568314,
+      "moyenne_shap": -0.0003239416939901429
+    },
+    {
+      "rang": 2,
+      "variable": "taux_endettement",
+      "libelle": "Taux d'endettement",
+      "moyenne_abs_shap": 0.1241558889098738,
+      "moyenne_shap": 0.0003517428536971274
+    },
+    {
+      "rang": 3,
+      "variable": "revenu",
+      "libelle": "Revenu",
+      "moyenne_abs_shap": 0.017128104036661686,
+      "moyenne_shap": 0.00033384560736199434
+    },
+    {
+      "rang": 4,
+      "variable": "credits",
+      "libelle": "Crédits en cours",
+      "moyenne_abs_shap": 0.013510059990155119,
+      "moyenne_shap": 9.080825093944409e-05
+    },
+    {
+      "rang": 5,
+      "variable": "age",
+      "libelle": "Âge",
+      "moyenne_abs_shap": 0.0019237665841778475,
+      "moyenne_shap": 0.0002724676526646083
+    },
+    {
+      "rang": 6,
+      "variable": "taille_entreprise",
+      "libelle": "Taille de l'entreprise",
+      "moyenne_abs_shap": 0.0016229237495451465,
+      "moyenne_shap": -0.00026354833366582853
+    },
+    {
+      "rang": 7,
+      "variable": "m-pay_sub_status_1_Désinscrit",
+      "libelle": "Statut : Désinscrit",
+      "moyenne_abs_shap": 0.0015989242859256521,
+      "moyenne_shap": -5.867470114436337e-06
+    },
+    {
+      "rang": 8,
+      "variable": "last_mvt",
+      "libelle": "Dernier mouvement (jours)",
+      "moyenne_abs_shap": 0.001433284873377374,
+      "moyenne_shap": -0.00016909029808372106
+    },
+    {
+      "rang": 9,
+      "variable": "m-pay_sub_city_Nabeul",
+      "libelle": "Ville : Nabeul",
+      "moyenne_abs_shap": 0.0014022536172666913,
+      "moyenne_shap": 0.000302908947955975
+    },
+    {
+      "rang": 10,
+      "variable": "anciennete",
+      "libelle": "Ancienneté",
+      "moyenne_abs_shap": 0.0013319653213821228,
+      "moyenne_shap": 0.00014552782949049157
+    },
+    {
+      "rang": 11,
+      "variable": "type_contrat_CDI",
+      "libelle": "Contrat CDI",
+      "moyenne_abs_shap": 0.001307933351807415,
+      "moyenne_shap": -0.0001900423165541158
+    },
+    {
+      "rang": 12,
+      "variable": "m-pay_sub_solde",
+      "libelle": "Solde du compte",
+      "moyenne_abs_shap": 0.0009127532176407554,
+      "moyenne_shap": 0.0005700579798933665
+    },
+    {
+      "rang": 13,
+      "variable": "m-pay_sub_status_1_Enregistré",
+      "libelle": "Statut : Enregistré",
+      "moyenne_abs_shap": 0.0008401063357632527,
+      "moyenne_shap": -0.00015848426954220856
+    },
+    {
+      "rang": 14,
+      "variable": "m-pay_sub_city_Sousse",
+      "libelle": "Ville : Sousse",
+      "moyenne_abs_shap": 0.0005136619644734535,
+      "moyenne_shap": -0.00037443205856300423
+    },
+    {
+      "rang": 15,
+      "variable": "type_contrat_Freelance",
+      "libelle": "Contrat Freelance",
+      "moyenne_abs_shap": 0.0004467487276713631,
+      "moyenne_shap": -0.00032038143641282526
+    },
+    {
+      "rang": 16,
+      "variable": "type_contrat_CDD",
+      "libelle": "Contrat CDD",
+      "moyenne_abs_shap": 0.0003252544802274684,
+      "moyenne_shap": -0.00020725757246212615
+    },
+    {
+      "rang": 17,
+      "variable": "m-pay_sub_city_Tunis",
+      "libelle": "Ville : Tunis",
+      "moyenne_abs_shap": 0.0002962111743646001,
+      "moyenne_shap": -0.0002818183584816203
+    },
+    {
+      "rang": 18,
+      "variable": "m-pay_sub_status_1_Inscrit",
+      "libelle": "Statut : Inscrit",
+      "moyenne_abs_shap": 0.0002899079022738891,
+      "moyenne_shap": 0.00022750468586703638
+    },
+    {
+      "rang": 19,
+      "variable": "surendettement",
+      "libelle": "Surendettement",
+      "moyenne_abs_shap": 0.0,
+      "moyenne_shap": 0.0
+    },
+    {
+      "rang": 20,
+      "variable": "SoldeCashBack",
+      "libelle": "Solde cashback",
+      "moyenne_abs_shap": 0.0,
+      "moyenne_shap": 0.0
+    }
+  ],
+  "predictions_bd_validation": [
+    {
+      "position": 0,
+      "identifiant": 2399,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 0.042425028415133556
+    },
+    {
+      "position": 1,
+      "identifiant": 1222,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 8.128520347110811e-07
+    },
+    {
+      "position": 2,
+      "identifiant": 2404,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 2.4439021551396645e-10
+    },
+    {
+      "position": 3,
+      "identifiant": 332,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 8.659881584668905e-05
+    },
+    {
+      "position": 4,
+      "identifiant": 1477,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 1.074243532461628e-09
+    },
+    {
+      "position": 5,
+      "identifiant": 1912,
+      "reel": 1,
+      "predit": 1,
+      "probabilite_accord": 0.9368364752900717
+    },
+    {
+      "position": 6,
+      "identifiant": 460,
+      "reel": 1,
+      "predit": 1,
+      "probabilite_accord": 0.9903271687700489
+    },
+    {
+      "position": 7,
+      "identifiant": 192,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 2.483205121771347e-12
+    },
+    {
+      "position": 8,
+      "identifiant": 2943,
+      "reel": 1,
+      "predit": 1,
+      "probabilite_accord": 0.8699138756964564
+    },
+    {
+      "position": 9,
+      "identifiant": 439,
+      "reel": 1,
+      "predit": 1,
+      "probabilite_accord": 0.9757373013496674
+    },
+    {
+      "position": 10,
+      "identifiant": 463,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 2.2724472790235382e-11
+    },
+    {
+      "position": 11,
+      "identifiant": 1353,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 2.864079038504052e-11
+    },
+    {
+      "position": 12,
+      "identifiant": 246,
+      "reel": 1,
+      "predit": 1,
+      "probabilite_accord": 0.9897569153788923
+    },
+    {
+      "position": 13,
+      "identifiant": 2419,
+      "reel": 1,
+      "predit": 1,
+      "probabilite_accord": 0.9401507819195224
+    },
+    {
+      "position": 14,
+      "identifiant": 93,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 5.905027291587786e-08
+    },
+    {
+      "position": 15,
+      "identifiant": 2488,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 0.00016120559200603711
+    },
+    {
+      "position": 16,
+      "identifiant": 1789,
+      "reel": 1,
+      "predit": 1,
+      "probabilite_accord": 0.9257112441596861
+    },
+    {
+      "position": 17,
+      "identifiant": 1508,
+      "reel": 1,
+      "predit": 1,
+      "probabilite_accord": 0.9659254446277359
+    },
+    {
+      "position": 18,
+      "identifiant": 1802,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 6.357323543089929e-11
+    },
+    {
+      "position": 19,
+      "identifiant": 144,
+      "reel": 0,
+      "predit": 0,
+      "probabilite_accord": 0.10511393737993807
+    }
+  ],
+  "local_refus": {
+    "position_dans_bd_validation": 0,
+    "identifiant_Unnamed_0": 2399,
+    "decision_reelle": "Refusé",
+    "decision_modele": "Refusé",
+    "probabilite_accord": 0.042425028415133556,
+    "valeur_de_base": 0.3871073425366684,
+    "somme_shap": -0.3446823141215349,
+    "controle_additivite": 0.042425028415133514,
+    "top5": [
+      {
+        "variable": "retard",
+        "libelle": "Retards de paiement",
+        "valeur_variable": 2.0,
+        "valeur_shap": -0.34454293547524606,
+        "sens": "vers le refus"
+      },
+      {
+        "variable": "taux_endettement",
+        "libelle": "Taux d'endettement",
+        "valeur_variable": 0.1676914477361654,
+        "valeur_shap": 0.02674146815246071,
+        "sens": "vers l'accord"
+      },
+      {
+        "variable": "revenu",
+        "libelle": "Revenu",
+        "valeur_variable": 1789.0,
+        "valeur_shap": -0.026341805872070117,
+        "sens": "vers le refus"
+      },
+      {
+        "variable": "credits",
+        "libelle": "Crédits en cours",
+        "valeur_variable": 1.0,
+        "valeur_shap": 0.008592623253290481,
+        "sens": "vers l'accord"
+      },
+      {
+        "variable": "age",
+        "libelle": "Âge",
+        "valeur_variable": 46.0,
+        "valeur_shap": -0.0023271195839626698,
+        "sens": "vers le refus"
+      }
+    ],
+    "toutes_valeurs_shap": {
+      "m-pay_sub_solde": -0.0014836954770383662,
+      "SoldeCashBack": 0.0,
+      "revenu": -0.026341805872070117,
+      "anciennete": 0.0,
+      "credits": 0.008592623253290481,
+      "retard": -0.34454293547524606,
+      "taille_entreprise": 0.0,
+      "taux_endettement": 0.02674146815246071,
+      "age": -0.0023271195839626698,
+      "last_mvt": -0.0013054443835010137,
+      "surendettement": 0.0,
+      "m-pay_sub_city_Nabeul": -0.0013977619448083622,
+      "m-pay_sub_city_Sousse": 0.0,
+      "m-pay_sub_city_Tunis": 0.0,
+      "type_contrat_CDD": 0.0,
+      "type_contrat_CDI": -0.0010186384413206628,
+      "type_contrat_Freelance": 0.0,
+      "m-pay_sub_status_1_Désinscrit": -0.0015990043493387786,
+      "m-pay_sub_status_1_Enregistré": 0.0,
+      "m-pay_sub_status_1_Inscrit": 0.0
+    }
+  },
+  "local_accord": {
+    "position_dans_bd_validation": 5,
+    "identifiant_Unnamed_0": 1912,
+    "decision_reelle": "Accepté",
+    "decision_modele": "Accepté",
+    "probabilite_accord": 0.9368364752900717,
+    "valeur_de_base": 0.3871073425366684,
+    "somme_shap": 0.5497291327534031,
+    "controle_additivite": 0.9368364752900715,
+    "top5": [
+      {
+        "variable": "retard",
+        "libelle": "Retards de paiement",
+        "valeur_variable": 1.0,
+        "valeur_shap": 0.35623969133385275,
+        "sens": "vers l'accord"
+      },
+      {
+        "variable": "taux_endettement",
+        "libelle": "Taux d'endettement",
+        "valeur_variable": 0.0742023250061835,
+        "valeur_shap": 0.15072629067206472,
+        "sens": "vers l'accord"
+      },
+      {
+        "variable": "revenu",
+        "libelle": "Revenu",
+        "valeur_variable": 4043.0,
+        "valeur_shap": 0.027165348081017518,
+        "sens": "vers l'accord"
+      },
+      {
+        "variable": "credits",
+        "libelle": "Crédits en cours",
+        "valeur_variable": 1.0,
+        "valeur_shap": 0.02083634718759816,
+        "sens": "vers l'accord"
+      },
+      {
+        "variable": "taille_entreprise",
+        "libelle": "Taille de l'entreprise",
+        "valeur_variable": 0.0,
+        "valeur_shap": 0.004809072360467771,
+        "sens": "vers l'accord"
+      }
+    ],
+    "toutes_valeurs_shap": {
+      "m-pay_sub_solde": 0.0,
+      "SoldeCashBack": 0.0,
+      "revenu": 0.027165348081017518,
+      "anciennete": -0.0017820514579706482,
+      "credits": 0.02083634718759816,
+      "retard": 0.35623969133385275,
+      "taille_entreprise": 0.004809072360467771,
+      "taux_endettement": 0.15072629067206472,
+      "age": 0.0,
+      "last_mvt": 0.0,
+      "surendettement": 0.0,
+      "m-pay_sub_city_Nabeul": 0.0,
+      "m-pay_sub_city_Sousse": 0.0,
+      "m-pay_sub_city_Tunis": -0.0020543995584393414,
+      "type_contrat_CDD": 0.0,
+      "type_contrat_CDI": -0.003694567347610367,
+      "type_contrat_Freelance": -0.0036362809183534653,
+      "m-pay_sub_status_1_Désinscrit": 0.0,
+      "m-pay_sub_status_1_Enregistré": 0.0011196824007759787,
+      "m-pay_sub_status_1_Inscrit": 0.0
+    }
+  }
+}
