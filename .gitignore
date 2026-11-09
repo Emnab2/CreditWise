@@ -1,0 +1,26 @@
+# Secrets
+.env
+
+# Bases de données (données clients, mots de passe hachés) et sauvegardes
+*.db
+*.backup
+
+# Vidéos de démonstration
+*.mp4
+*.webm
+
+# Fichiers sans rapport avec CreditWise
+project/
+test.py
+
+# Python / éditeurs
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.vscode/
+
+# Données (confidentielles) : jamais publiées
+*.csv
+# Modèles SVM : contiennent des lignes réelles des données d'entraînement (vecteurs de support)
+model_svm.pkl
+model_logistic_regression.pkl

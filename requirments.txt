@@ -1,0 +1,11 @@
+flask
+flask-sqlalchemy
+flask-login
+flask-mail
+itsdangerous
+click
+numpy
+pandas
+matplotlib
+scikit-learn
+shap
