@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+    <title>CreditWise — Tableau de bord</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-900: #14225C;
+            --blue-700: #1A3A8F;
+            --blue-500: #1E4FC4;
+            --blue-soft: #E9EFFC;
+            --bg-light: #F4F6FB;
+            --text-primary: #14213D;
+            --text-muted: #8891A8;
+            --success: #17A673;
+            --success-soft: #E4F8F0;
+            --danger: #E24B4A;
+            --danger-soft: #FCEBEB;
+            --amber: #EF9F27;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            background: var(--bg-light);
+        }
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ---------- Sidebar ---------- */
+        .sidebar {
+            width: 240px;
+            background: #fff;
+            border-right: 1px solid #ECEFF6;
+            padding: 1.5rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .side-brand { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2rem; }
+        .side-brand .icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: var(--blue-700); color: #fff;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+        }
+        .side-brand .name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; }
+        .side-section-label {
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
+            color: var(--text-muted); text-transform: uppercase; margin: 1rem 0 0.5rem 0.3rem;
+        }
+        .side-link {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.6rem 0.8rem; border-radius: 10px;
+            color: var(--text-primary); text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+        .side-link.active { background: var(--blue-700); color: #fff; }
+        .side-link:not(.active):hover { background: var(--bg-light); }
+        .sidebar-footer {
+            margin-top: auto; padding-top: 1rem; border-top: 1px solid #ECEFF6;
+            display: flex; align-items: center; gap: 0.6rem;
+        }
+        .avatar-round {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--blue-700); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 600; flex-shrink: 0;
+        }
+        .user-name { font-size: 0.85rem; font-weight: 600; }
+        .user-role { font-size: 0.75rem; color: var(--text-muted); }
+        .logout-icon { margin-left: auto; color: var(--text-muted); text-decoration: none; }
+
+        /* ---------- Main ---------- */
+        .main { flex: 1; padding: 1.8rem 2.2rem; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.8rem; }
+        .topbar h1 { font-family: 'Poppins', sans-serif; font-size: 1.4rem; margin: 0; }
+        .topbar .subtitle { color: var(--text-muted); font-size: 0.88rem; margin-top: 0.2rem; }
+        .topbar-actions { display: flex; align-items: center; gap: 0.9rem; }
+        .bell-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--blue-soft); border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer; color: var(--blue-700);
+        }
+        .btn-new {
+            background: var(--blue-700); color: #fff; border: none;
+            padding: 0.65rem 1.2rem; border-radius: 10px; font-weight: 600;
+            font-size: 0.88rem; cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        .btn-new:hover { background: var(--blue-900); }
+
+        /* ---------- Stat cards ---------- */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.6rem; }
+        .stat-card { background: #fff; border-radius: 16px; padding: 1.2rem; box-shadow: 0 4px 16px rgba(20,34,92,0.05); }
+        .stat-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 0.8rem; }
+        .stat-icon.total { background: var(--blue-soft); color: var(--blue-700); }
+        .stat-icon.ok { background: var(--success-soft); color: var(--success); }
+        .stat-icon.ko { background: var(--danger-soft); color: var(--danger); }
+        .stat-icon.wait { background: #F0EEFA; color: var(--text-muted); }
+        .stat-value { font-family: 'Poppins', sans-serif; font-size: 1.7rem; font-weight: 700; }
+        .stat-label { font-size: 0.83rem; color: var(--text-muted); }
+
+        /* ---------- Search + filters ---------- */
+        .toolbar { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; align-items: center; }
+        .search-input {
+            flex: 1; padding: 0.65rem 1rem; border-radius: 10px; border: 1.5px solid #E3E7F1;
+            font-size: 0.88rem; outline: none;
+        }
+        .search-input:focus { border-color: var(--blue-500); }
+        .filter-tabs { display: flex; background: #fff; border-radius: 10px; padding: 4px; box-shadow: 0 2px 8px rgba(20,34,92,0.04); }
+        .filter-btn {
+            border: none; background: transparent; padding: 0.5rem 1rem; border-radius: 8px;
+            font-size: 0.83rem; font-weight: 600; color: var(--text-muted); cursor: pointer;
+        }
+        .filter-btn.active { background: var(--blue-700); color: #fff; }
+
+        /* ---------- Table ---------- */
+        .table-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 16px rgba(20,34,92,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            text-align: left; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase;
+            color: var(--text-muted); padding: 0.9rem 1rem; border-bottom: 1px solid #ECEFF6;
+        }
+        tbody td { padding: 0.85rem 1rem; border-bottom: 1px solid #F3F4F9; font-size: 0.88rem; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        .client-cell { display: flex; align-items: center; gap: 0.7rem; }
+        .client-name { font-weight: 600; }
+        .client-sub { font-size: 0.75rem; color: var(--text-muted); }
+        .pill { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; background: var(--blue-soft); color: var(--blue-700); }
+        .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+        .badge-ok { background: var(--success-soft); color: var(--success); }
+        .badge-ko { background: var(--danger-soft); color: var(--danger); }
+        .badge-wait { background: #F0EEFA; color: var(--text-muted); }
+
+
+        .bar-track { width: 90px; height: 6px; border-radius: 999px; background: #ECEFF6; overflow: hidden; display: inline-block; vertical-align: middle; }
+        .bar-fill { height: 100%; border-radius: 999px; }
+        .rate-cell { display: flex; align-items: center; gap: 0.5rem; }
+
+        .actions-cell { display: flex; align-items: center; gap: 0.4rem; }
+        .icon-btn {
+            width: 30px; height: 30px; border-radius: 8px; border: none; background: var(--bg-light);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted);
+            text-decoration: none; font-size: 0.85rem;
+        }
+        .icon-btn.danger:hover { background: var(--danger-soft); color: var(--danger); }
+        .link-btn {
+            padding: 0.35rem 0.8rem; border-radius: 8px; background: var(--blue-soft); color: var(--blue-700);
+            font-size: 0.78rem; font-weight: 600; text-decoration: none; white-space: nowrap;
+        }
+
+        .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="side-brand">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="CreditWise" class="icon" style="background:none;">
+            <div class="name">CreditWise</div>
+        </div>
+        <div class="side-section-label">Principal</div>
+        <a href="{{ url_for('dashboard') }}" class="side-link active">🏠 Tableau de bord</a>
+        <a href="{{ url_for('statistics') }}" class="side-link ">📈 Statistiques</a>
+        <a href="{{ url_for('credits_historique') }}" class="side-link">💳 Historique des crédits</a>
+       
+        <a href="{{ url_for('settings') }}" class="side-link">⚙️ Paramètres</a>
+        <div class="sidebar-footer">
+            <div class="avatar-round">{{ current_user.nom[:2].upper() }}</div>
+            <div>
+                <div class="user-name">{{ current_user.nom }}</div>
+                <div class="user-role">Banquier</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-icon" title="Déconnexion">↪</a>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+        <div class="topbar">
+            <div>
+                <h1>Tableau de bord</h1>
+                <div class="subtitle">Gestion des dossiers clients</div>
+            </div>
+            <div class="topbar-actions">
+                <button class="bell-btn" title="Notifications">🔔</button>
+                <a href="{{ url_for('add_client') }}" class="btn-new">+ Nouveau client</a>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background: var(--blue-soft); color: var(--blue-700); padding: 0.7rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.85rem;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Stat cards -->
+        {% set total = clients|length %}
+        {% set acceptes = clients|selectattr('derniere_decision', 'equalto', 'Accepté')|list|length %}
+        {% set refuses = clients|selectattr('derniere_decision', 'equalto', 'Refusé')|list|length %}
+        {% set attente = total - acceptes - refuses %}
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon total">👥</div>
+                <div class="stat-value">{{ total }}</div>
+                <div class="stat-label">Total clients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon ok">✓</div>
+                <div class="stat-value">{{ acceptes }}</div>
+                <div class="stat-label">Acceptés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon ko">✕</div>
+                <div class="stat-value">{{ refuses }}</div>
+                <div class="stat-label">Refusés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon wait">🕐</div>
+                <div class="stat-value">{{ attente }}</div>
+                <div class="stat-label">Non évalués</div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <input type="text" id="searchInput" class="search-input" placeholder="Nom, MSISDN, code banque..." oninput="filterTable()">
+            <div class="filter-tabs">
+                <button class="filter-btn active" data-filter="tous" onclick="setFilter('tous', this)">Tous</button>
+                <button class="filter-btn" data-filter="accepte" onclick="setFilter('accepte', this)">Acceptés</button>
+                <button class="filter-btn" data-filter="refuse" onclick="setFilter('refuse', this)">Refusés</button>
+                <button class="filter-btn" data-filter="attente" onclick="setFilter('attente', this)">En attente</button>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+            {% if clients %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Ville</th>
+                        <th>Contrat</th>
+                        <th>Décision</th>
+                        <th>Taux endettement</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="clientsBody">
+                    {% for client in clients %}
+                    {% set statut_filtre = 'accepte' if client.derniere_decision == 'Accepté' else ('refuse' if client.derniere_decision == 'Refusé' else 'attente') %}
+                    {% set initiales = (client.prenom[:1] ~ client.nom[:1])|upper %}
+                    <tr data-statut="{{ statut_filtre }}" data-search="{{ (client.prenom ~ ' ' ~ client.nom ~ ' ' ~ (client.msisdn or '') ~ ' ' ~ (client.bankcode or ''))|lower }}">
+                        <td>
+                            <a href="{{ url_for('client_fiche', client_id=client.id) }}" class="client-cell" style="text-decoration: none; color: inherit;">
+                                <div class="avatar-round" style="background: {{ ['#1A3A8F', '#17A673', '#EF9F27', '#7F77DD'][loop.index0 % 4] }};">{{ initiales }}</div>
+                                <div>
+                                    <div class="client-name">{{ client.prenom }} {{ client.nom }}</div>
+                                    <div class="client-sub">{{ client.msisdn or '—' }} · {{ client.bankcode or '—' }}</div>
+                                </div>
+                            </a>
+                        </td>
+                        <td>{{ client.ville }}</td>
+                        <td><span class="pill">{{ client.type_contrat }}</span></td>
+                        <td>
+                            {% if client.derniere_decision == 'Accepté' %}
+                                <span class="badge badge-ok">✓ Accepté</span>
+                            {% elif client.derniere_decision == 'Refusé' %}
+                                <span class="badge badge-ko">✕ Refusé</span>
+                            {% else %}
+                                <span class="badge badge-wait">🕐 Non évalué</span>
+                            {% endif %}
+                        </td>
+                       <td>
+    {% set taux_pct = (client.taux_endettement * 100) | round(0, 'common') | int %}
+    {% set bar_width = taux_pct if taux_pct <= 100 else 100 %}
+    <div class="rate-cell">
+        <span class="bar-track">
+            <span class="bar-fill" style="width: {{ bar_width }}%; background: {{ '#E24B4A' if taux_pct > 50 else ('#EF9F27' if taux_pct > 30 else '#17A673') }};"></span>
+        </span>
+        <span>{{ taux_pct }}%{% if taux_pct > 50 %} ⚠️{% endif %}</span>
+    </div>
+</td>
+                        <td>
+                            <div class="actions-cell">
+                                <a href="{{ url_for('client_fiche', client_id=client.id) }}" class="icon-btn" title="Voir la fiche">👤</a>
+                                <form method="POST" action="{{ url_for('delete_client', client_id=client.id) }}" onsubmit="return confirm('Supprimer ce client ?');">
+                                    <button type="submit" class="icon-btn danger" title="Supprimer">🗑</button>
+                                </form>
+                                <a href="{{ url_for('client_fiche', client_id=client.id) }}" class="link-btn">Voir la fiche</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">Aucun client pour l'instant. Cliquez sur "+ Nouveau client" pour commencer.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentFilter = 'tous';
+
+    function setFilter(filter, btn) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterTable();
+    }
+
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#clientsBody tr');
+        rows.forEach(row => {
+            const matchesFilter = currentFilter === 'tous' || row.dataset.statut === currentFilter;
+            const matchesSearch = row.dataset.search.includes(search);
+            row.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>

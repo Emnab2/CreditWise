@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+    <title>CreditWise — {{ 'Modifier' if client else 'Nouveau' }} dossier client</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-900: #14225C; --blue-700: #1A3A8F; --blue-500: #1E4FC4; --blue-soft: #E9EFFC;
+            --bg-light: #F4F6FB; --text-primary: #14213D; --text-muted: #8891A8;
+            --success: #17A673; --success-soft: #E4F8F0;
+            --danger: #E24B4A; --danger-soft: #FCEBEB;
+            --decide-purple: #76369b;
+            --decide-purple-soft: #e3cbf4;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Inter', sans-serif; color: var(--text-primary); background: var(--bg-light); }
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ---------- Sidebar ---------- */
+        .sidebar { width: 240px; background: #fff; border-right: 1px solid #ECEFF6; padding: 1.5rem 1.2rem; display: flex; flex-direction: column; }
+        .side-brand { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2rem; }
+        .side-brand .icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .side-brand .name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; }
+        .side-section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text-muted); text-transform: uppercase; margin: 1rem 0 0.5rem 0.3rem; }
+        .side-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 10px; color: var(--text-primary); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+        .side-link.active { background: var(--blue-700); color: #fff; }
+        .side-link:not(.active):hover { background: var(--bg-light); }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid #ECEFF6; display: flex; align-items: center; gap: 0.6rem; }
+        .avatar-round { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 0.85rem; font-weight: 600; }
+        .user-role { font-size: 0.75rem; color: var(--text-muted); }
+        .logout-icon { margin-left: auto; color: var(--text-muted); text-decoration: none; }
+
+        /* ---------- Main ---------- */
+        .main { flex: 1; padding: 1.8rem 2.2rem; }
+        .topbar { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1.8rem; }
+        .back-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--blue-soft); border: none; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; color: var(--blue-700); text-decoration: none; }
+        .topbar h1 { font-family: 'Poppins', sans-serif; font-size: 1.35rem; margin: 0; }
+        .topbar .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.15rem; }
+
+        .alert { padding: 0.7rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.85rem; }
+        .alert-success { background: var(--success-soft); color: var(--success); }
+        .alert-danger { background: #FCEBEB; color: #E24B4A; }
+        .alert-info { background: var(--blue-soft); color: var(--blue-700); }
+
+        /* ---------- Toasts (notifications flottantes) ---------- */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .toast {
+            padding: 0.8rem 1.3rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(20,34,92,0.15);
+            animation: toast-in 0.25s ease, toast-out 0.4s ease 2.6s forwards;
+        }
+        .toast-success { background: var(--success-soft); color: #0C6B4E; border: 1px solid var(--success); }
+        .toast-danger { background: var(--danger-soft); color: #A22B2A; border: 1px solid var(--danger); }
+        .toast-info { background: var(--blue-soft); color: var(--blue-700); border: 1px solid var(--blue-500); }
+
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes toast-out {
+            from { opacity: 1; }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* ---------- Section cards ---------- */
+        .section-card { background: #fff; border-radius: 16px; padding: 1.6rem; box-shadow: 0 4px 16px rgba(20,34,92,0.05); margin-bottom: 1.2rem; }
+        .section-head { display: flex; align-items: flex-start; gap: 0.8rem; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid #ECEFF6; }
+        .section-head.centered { align-items: center; }
+        .section-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-soft); color: var(--blue-700); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .section-icon.numeric { background: var(--success-soft); color: var(--success); }
+        .section-icon.credit { background: var(--decide-purple-soft); color: var(--decide-purple); }
+        .section-title { font-weight: 600; font-size: 0.98rem; }
+        .section-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.2rem; }
+        .field-label { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem; }
+        .field-input, .field-select {
+            width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #E3E7F1; border-radius: 10px;
+            font-size: 0.9rem; font-family: 'Inter', sans-serif; background: #FAFBFD; outline: none;
+        }
+        .field-input:focus, .field-select:focus { border-color: var(--blue-500); background: #fff; }
+        .field-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+        /* ---------- Boutons ---------- */
+        .actions-row { display: flex; gap: 0.8rem; margin-bottom: 0.8rem; }
+        .btn-save { background: var(--blue-700); color: #fff; border: none; padding: 0.75rem 1.4rem; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+        .btn-save:hover { background: var(--blue-900); }
+        .btn-cancel { background: var(--blue-soft); color: var(--blue-700); border: none; padding: 0.75rem 1.4rem; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+
+        .decide-card { background: var(--decide-purple-soft); border: 1.5px dashed var(--decide-purple); border-radius: 14px; padding: 1.1rem 1.3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+        .decide-text { font-size: 0.85rem; color: #76369b; }
+        .decide-text strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; color: var(--text-primary); }
+        .btn-decide { background: var(--decide-purple); color: #fff; border: none; padding: 0.7rem 1.3rem; border-radius: 10px; font-weight: 600; font-size: 0.87rem; cursor: pointer; white-space: nowrap; }
+        .btn-decide:hover { filter: brightness(0.95); }
+
+        /* ---------- Résultat inline (décision) ---------- */
+        .decision-result { margin-top: 1.2rem; }
+        .decision-card {
+            border-radius: 16px; padding: 1.6rem; margin-bottom: 1.2rem;
+            display: flex; align-items: center; gap: 1.2rem;
+        }
+        .decision-card.accepted { background: var(--success-soft); border: 1.5px solid var(--success); }
+        .decision-card.refused { background: var(--danger-soft); border: 1.5px solid var(--danger); }
+        .decision-icon {
+            width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 1.5rem; flex-shrink: 0; color: #fff;
+        }
+        .decision-icon.accepted { background: var(--success); }
+        .decision-icon.refused { background: var(--danger); }
+        .decision-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.2rem; }
+        .decision-value { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 700; }
+        .decision-value.accepted { color: #0C6B4E; }
+        .decision-value.refused { color: #A22B2A; }
+
+        .xai-intro { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; }
+        .shap-img-wrap { text-align: center; margin-bottom: 0.5rem; }
+        .shap-img-wrap img { max-width: 100%; border-radius: 10px; border: 1px solid #ECEFF6; }
+        .shap-caption { font-size: 0.78rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; }
+
+        .factor-row { margin-bottom: 1.1rem; }
+        .factor-row:last-child { margin-bottom: 0; }
+        .factor-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+        .factor-label { font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+        .factor-tag { font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .factor-tag.positif { background: var(--success-soft); color: var(--success); }
+        .factor-tag.negatif { background: var(--danger-soft); color: var(--danger); }
+        .factor-impact { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
+        .factor-bar-bg { width: 100%; height: 8px; background: var(--bg-light); border-radius: 999px; overflow: hidden; }
+        .factor-bar-fill { height: 100%; border-radius: 999px; }
+        .factor-bar-fill.positif { background: var(--success); }
+        .factor-bar-fill.negatif { background: var(--danger); }
+
+        /* ---------- Historique des crédits ---------- */
+        .credit-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+        .credit-table th {
+            text-align: left; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em;
+            color: var(--text-muted); text-transform: uppercase; padding: 0.5rem 0.6rem;
+            border-bottom: 1.5px solid #ECEFF6;
+        }
+        .credit-table td { padding: 0.65rem 0.6rem; border-bottom: 1px solid #ECEFF6; }
+        .credit-table tr:last-child td { border-bottom: none; }
+        .credit-status {
+            display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem;
+            border-radius: 999px; text-transform: capitalize;
+        }
+        .credit-status.en-cours { background: var(--blue-soft); color: var(--blue-700); }
+        .credit-status.solde { background: var(--success-soft); color: var(--success); }
+        .credit-status.en-retard { background: var(--danger-soft); color: var(--danger); }
+        .credit-status.refuse { background: #F0F0F3; color: var(--text-muted); }
+        .credit-empty { font-size: 0.85rem; color: var(--text-muted); padding: 0.8rem 0; }
+        .credit-add-row { display: flex; gap: 0.8rem; align-items: flex-end; margin-top: 1.2rem; flex-wrap: wrap; }
+        .credit-add-row .field-group { flex: 1; min-width: 160px; }
+        .btn-delete-mini {
+            background: none; border: none; color: var(--danger); cursor: pointer;
+            font-size: 0.78rem; font-weight: 600; padding: 0.2rem 0.4rem;
+        }
+        .btn-delete-mini:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="side-brand">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="CreditWise" class="icon" style="background:none;">
+            <div class="name">CreditWise</div>
+        </div>
+        <div class="side-section-label">Principal</div>
+        <a href="{{ url_for('dashboard') }}" class="side-link ">🏠 Tableau de bord</a>
+        <a href="{{ url_for('statistics') }}" class="side-link ">📈 Statistiques</a>
+        <a href="{{ url_for('credits_historique') }}" class="side-link ">💳 Historique des crédits</a>
+        <a href="{{ url_for('settings') }}" class="side-link">⚙️ Paramètres</a>
+        <div class="sidebar-footer">
+            <div class="avatar-round">{{ current_user.nom[:2].upper() }}</div>
+            <div>
+                <div class="user-name">{{ current_user.nom }}</div>
+                <div class="user-role">Banquier</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-icon" title="Déconnexion">↪</a>
+        </div>
+    </div>
+    <div class="main">
+        <div class="topbar">
+            <a href="{{ url_for('dashboard') }}" class="back-btn">←</a>
+            <div>
+                <h1>{{ 'Nouvelle demande de crédit' if is_new_credit else ('Modifier le dossier client' if client else 'Nouveau dossier client') }}</h1>
+                <div class="subtitle">{{ 'Saisie d\'une nouvelle demande de crédit pour ce client' if is_new_credit else 'Saisie des informations avant soumission au modèle de scoring' }}</div>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="toast-container">
+                    {% for category, message in messages %}
+                        <div class="toast toast-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" id="clientForm">
+            <input type="hidden" name="is_new_credit" value="{{ '1' if is_new_credit else '0' }}">
+
+            <!-- Identification -->
+            <div class="section-card">
+                <div class="section-head centered">
+                    <div class="section-icon">👤</div>
+                    <div class="section-title">Informations personnelles</div>
+                </div>
+                <div class="field-grid">
+                    <div>
+                        <label class="field-label">Prénom</label>
+                        <input type="text" name="prenom" class="field-input" value="{{ client.prenom if client else '' }}" required>
+                    </div>
+                    <div>
+                        <label class="field-label">Nom</label>
+                        <input type="text" name="nom" class="field-input" value="{{ client.nom if client else '' }}" required>
+                    </div>
+                    <div>
+                        <label class="field-label">Identifiant client (msisdn)</label>
+                        <input type="text" name="msisdn" class="field-input" value="{{ client.msisdn if client else '' }}">
+                    </div>
+                    <div>
+                        <label class="field-label">Code banque</label>
+                        <input type="text" name="bankcode" class="field-input" value="{{ client.bankcode if client else '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catégorielles -->
+            <div class="section-card">
+                <div class="section-head centered">
+                    <div class="section-icon">📄</div>
+                    <div class="section-title">Informations catégorielles</div>
+                </div>
+                <div class="field-grid">
+                    <div>
+                        <label class="field-label">Ville</label>
+                        <input type="text" name="ville" class="field-input" value="{{ '' if is_new_credit else (client.ville if client else '') }}" placeholder="Ex: Tunis" required>
+                    </div>
+                    <div>
+                        <label class="field-label">Statut du compte</label>
+                        <select name="statut" class="field-select">
+                            {% for s in ['Désinscrit', 'Enregistré', 'Inscrit'] %}
+                            <option value="{{ s }}" {% if not is_new_credit and client and client.statut == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="field-label">Type de contrat</label>
+                        <select name="type_contrat" class="field-select">
+                            {% for t in ['CDD', 'CDI', 'Freelance'] %}
+                            <option value="{{ t }}" {% if not is_new_credit and client and client.type_contrat == t %}selected{% endif %}>{{ t }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="field-label">Taille de l'entreprise</label>
+                        <select name="taille_entreprise" class="field-select">
+                            {% for t in ['Petite', 'Moyenne', 'Grande'] %}
+                            <option value="{{ t }}" {% if not is_new_credit and taille_actuelle == t %}selected{% endif %}>{{ t }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Numériques -->
+            <div class="section-card">
+                <div class="section-head centered">
+                    <div class="section-icon numeric">📈</div>
+                    <div class="section-title">Informations numériques</div>
+                </div>
+                <div class="field-grid">
+                    <div>
+                        <label class="field-label">Âge</label>
+                        <input type="number" name="age" class="field-input" min="0" step="1"
+                               value="{{ '' if is_new_credit else (client.age if client else '') }}" placeholder="Ex: 35" required>
+                    </div>
+                    <div>
+                        <label class="field-label">Revenu</label>
+                        <input type="number" name="revenu" class="field-input" min="0" step="1"
+                               value="{{ '' if is_new_credit else (client.revenu if client else '') }}" placeholder="Ex: 1500" required>
+                    </div>
+                    <div>
+                        <label class="field-label">Solde (m-pay_sub_solde)</label>
+                        <input type="number" name="solde" class="field-input" step="1"
+                               value="{{ '' if is_new_credit else (client.solde if client else '') }}" placeholder="Ex: 2500" required>
+                        <div class="field-hint">Solde actuel du compte mobile (peut être négatif)</div>
+                    </div>
+                    <div>
+                        <label class="field-label">Solde CashBack</label>
+                        <input type="number" step="any" name="solde_cashback" class="field-input"
+                               value="{{ '' if is_new_credit else (client.solde_cashback if client else '') }}" placeholder="Ex: 50" required>
+                        <div class="field-hint">Cumul des points de cashback</div>
+                    </div>
+                    <div>
+                        <label class="field-label">Ancienneté (années)</label>
+                        <input type="number" name="anciennete" class="field-input" min="0" step="1"
+                               value="{{ '' if is_new_credit else (client.anciennete if client else '') }}" placeholder="Ex: 5" required>
+                    </div>
+                    <div>
+                        <label class="field-label">Nb de crédits en cours</label>
+                        <input type="number" name="credits" class="field-input" min="0" step="1"
+                               value="{{ '' if is_new_credit else (client.credits if client else '') }}" placeholder="Ex: 1" required>
+                    </div>
+                    <div>
+                        <label class="field-label">Nb de retards de paiement</label>
+                        <input type="number" name="retard" class="field-input" min="0" step="1"
+                               value="{{ '' if is_new_credit else (client.retard if client else '') }}" placeholder="Ex: 0" required>
+                    </div>
+                    <div>
+                        <label class="field-label">Taux d'endettement</label>
+                        <input type="text" name="taux_endettement" class="field-input"
+                               pattern="^\d+(\.\d+)?$"
+                               placeholder="0.25"
+                               value="{{ '' if is_new_credit else (client.taux_endettement if client else '') }}" required>
+                        <div class="field-hint">Valeur décimale avec un point — ex : 0.25 = 25%, 1.4 = 140%</div>
+                    </div>
+                    <div>
+                        <label class="field-label">Dernier mouvement (jours)</label>
+                        <input type="number" name="dernier_mvt" class="field-input" min="0" step="1"
+                               value="{{ '' if is_new_credit else (client.dernier_mvt if client else '') }}" placeholder="Ex: 10" required>
+                        <div class="field-hint">Nombre de jours depuis la dernière opération</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons -->
+            <div class="actions-row">
+                <button type="submit" name="action" value="save" class="btn-save">
+                    {{ 'Enregistrer les modifications' if client else 'Enregistrer le dossier' }}
+                </button>
+                <a href="{{ url_for('dashboard') }}" class="btn-cancel">Annuler</a>
+            </div>
+
+            <!-- Décision du modèle -->
+            <div class="decide-card">
+                <div class="decide-text">
+                    <strong>{{ 'Nouvelle demande de crédit' if is_new_credit else 'Laisser le modèle décider' }}</strong>
+                    {{ 'Remplissez le dossier et lancez l\'évaluation pour ce client.' if is_new_credit else 'Enregistre le dossier et voir la décision.' }}
+                </div>
+                <button type="submit" name="action" value="save_and_evaluate" class="btn-decide">
+                    🤖 {{ 'Nouvelle demande de crédit' if is_new_credit else 'Enregistrer et évaluer' }}
+                </button>
+            </div>
+
+            {% if decision %}
+            <div class="decision-result">
+
+                <div class="decision-card {{ 'accepted' if decision == 'Accepté' else 'refused' }}">
+                    <div class="decision-icon {{ 'accepted' if decision == 'Accepté' else 'refused' }}">
+                        {{ '✓' if decision == 'Accepté' else '✕' }}
+                    </div>
+                    <div>
+                        <div class="decision-label">Décision du modèle</div>
+                        <div class="decision-value {{ 'accepted' if decision == 'Accepté' else 'refused' }}">{{ decision }}</div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-head">
+                        <div class="section-icon">📋</div>
+                        <div class="section-title">Détail des facteurs principaux</div>
+                    </div>
+                    {% for f in facteurs %}
+                    <div class="factor-row">
+                        <div class="factor-head">
+                            <div class="factor-label">
+                                {{ f.label }}
+                                <span class="factor-tag {{ f.sens }}">{{ 'Favorable' if f.sens == 'positif' else 'Défavorable' }}</span>
+                            </div>
+                            <div class="factor-impact">{{ f.impact_pct }}%</div>
+                        </div>
+                        <div class="factor-bar-bg">
+                            <div class="factor-bar-fill {{ f.sens }}" style="width: {{ f.largeur_barre }}%;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="section-card">
+                    <div class="section-head">
+                        <div class="section-icon">🔍</div>
+                        <div class="section-title">Pourquoi cette décision ? (vue détaillée du dossier)</div>
+                    </div>
+                    <p class="xai-intro">
+                        Chaque ligne montre comment un critère fait évoluer la prédiction, du point de départ moyen
+                        jusqu'à la décision finale de ce dossier. En rouge : pousse vers l'acceptation.
+                        En bleu : pousse vers le refus.
+                    </p>
+                    <div class="shap-img-wrap">
+                        <img src="data:image/png;base64,{{ force_plot_b64 }}" alt="Waterfall plot SHAP du dossier">
+                    </div>
+                    <div class="shap-caption">Explication locale — spécifique à ce client</div>
+                </div>
+
+            </div>
+            {% endif %}
+
+        </form>
+
+        {% if client %}
+        <!-- Historique des crédits : formulaire séparé, uniquement en mode édition -->
+        <div class="section-card">
+            <div class="section-head centered">
+                <div class="section-icon credit">💳</div>
+                <div>
+                    <div class="section-title">Historique des crédits</div>
+                    <div class="section-sub">Toutes les demandes de crédit passées de ce client</div>
+                </div>
+            </div>
+
+            {% if client.credits_historique %}
+            <table class="credit-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Décision</th>
+                        <th>Statut</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in client.credits_historique %}
+                    <tr>
+                        <td>{{ c.date_demande.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            {% if c.decision == 'Accepté' %}
+                                <span class="credit-status solde" style="background: var(--success-soft); color: var(--success);">✓ Accepté</span>
+                            {% else %}
+                                <span class="credit-status refuse" style="background: var(--danger-soft); color: var(--danger);">✕ Refusé</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="credit-status {{ c.statut|lower|replace(' ', '-') }}">{{ c.statut }}</span>
+                        </td>
+                        <td style="display:flex; gap: 0.6rem; align-items:center;">
+                            <a href="{{ url_for('credit_historique_detail', credit_id=c.id) }}" class="btn-cancel" style="padding: 0.35rem 0.8rem; font-size: 0.78rem;">Voir le détail</a>
+                            <form method="POST" action="{{ url_for('delete_credit', credit_id=c.id) }}" style="display:inline;">
+                                <button type="submit" class="btn-delete-mini" onclick="return confirm('Supprimer cette entrée de l\'historique ?');">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="credit-empty">Aucune demande de crédit enregistrée pour ce client pour le moment. Chaque clic sur "Enregistrer et évaluer" ci-dessus créera automatiquement une entrée ici.</div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var toasts = document.querySelectorAll('.toast');
+        toasts.forEach(function (t) {
+            setTimeout(function () { t.remove(); }, 3200);
+        });
+    });
+</script>
+
+</body>
+</html>

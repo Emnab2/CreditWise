@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+    <title>CreditWise — Détail de la demande</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-900: #14225C; --blue-700: #1A3A8F; --blue-500: #1E4FC4; --blue-soft: #E9EFFC;
+            --bg-light: #F4F6FB; --text-primary: #14213D; --text-muted: #8891A8;
+            --success: #17A673; --success-soft: #E4F8F0;
+            --danger: #E24B4A; --danger-soft: #FCEBEB;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Inter', sans-serif; color: var(--text-primary); background: var(--bg-light); }
+        .layout { display: flex; min-height: 100vh; }
+
+        .sidebar { width: 240px; background: #fff; border-right: 1px solid #ECEFF6; padding: 1.5rem 1.2rem; display: flex; flex-direction: column; }
+        .side-brand { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2rem; }
+        .side-brand .icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .side-brand .name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; }
+        .side-section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text-muted); text-transform: uppercase; margin: 1rem 0 0.5rem 0.3rem; }
+        .side-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 10px; color: var(--text-primary); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+        .side-link.active { background: var(--blue-700); color: #fff; }
+        .side-link:not(.active):hover { background: var(--bg-light); }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid #ECEFF6; display: flex; align-items: center; gap: 0.6rem; }
+        .avatar-round { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 0.85rem; font-weight: 600; }
+        .user-role { font-size: 0.75rem; color: var(--text-muted); }
+        .logout-icon { margin-left: auto; color: var(--text-muted); text-decoration: none; }
+
+        .main { flex: 1; padding: 1.8rem 2.2rem; }
+        .topbar { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1.8rem; }
+        .back-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--blue-soft); border: none; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; color: var(--blue-700); text-decoration: none; }
+        .topbar h1 { font-family: 'Poppins', sans-serif; font-size: 1.35rem; margin: 0; }
+        .topbar .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.15rem; }
+
+        .section-card { background: #fff; border-radius: 16px; padding: 1.6rem; box-shadow: 0 4px 16px rgba(20,34,92,0.05); margin-bottom: 1.2rem; }
+        /* "Voir détails" amène ici : défilement fluide + bref surlignage pour repérer la section */
+        html { scroll-behavior: smooth; }
+        #details { scroll-margin-top: 1.5rem; }
+        #details:target { animation: details-flash 1.6s ease; }
+        @keyframes details-flash { 0%, 40% { box-shadow: 0 0 0 3px var(--blue-500), 0 4px 16px rgba(20,34,92,0.05); } 100% { box-shadow: 0 4px 16px rgba(20,34,92,0.05); } }
+        .section-head { display: flex; align-items: flex-start; gap: 0.8rem; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid #ECEFF6; }
+        .section-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-soft); color: var(--blue-700); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .section-title { font-weight: 600; font-size: 0.98rem; }
+
+        .decision-card {
+            border-radius: 16px; padding: 1.6rem; margin-bottom: 1.2rem;
+            display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; flex-wrap: wrap;
+        }
+        .decision-card.accepted { background: var(--success-soft); border: 1.5px solid var(--success); }
+        .decision-card.refused { background: var(--danger-soft); border: 1.5px solid var(--danger); }
+        .decision-left { display: flex; align-items: center; gap: 1.2rem; }
+        .decision-icon {
+            width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 1.5rem; flex-shrink: 0; color: #fff;
+        }
+        .decision-icon.accepted { background: var(--success); }
+        .decision-icon.refused { background: var(--danger); }
+        .decision-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.2rem; }
+        .decision-value { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 700; }
+        .decision-value.accepted { color: #0C6B4E; }
+        .decision-value.refused { color: #A22B2A; }
+        .decision-date { font-size: 0.82rem; color: var(--text-muted); }
+
+        .statut-form { display: flex; gap: 0.6rem; align-items: center; }
+        .statut-select {
+            padding: 0.55rem 0.8rem; border-radius: 8px; border: 1.5px solid #E3E7F1;
+            font-size: 0.85rem; font-family: 'Inter', sans-serif; background: #fff;
+        }
+        .btn-save-mini { background: var(--blue-700); color: #fff; border: none; padding: 0.55rem 1rem; border-radius: 8px; font-weight: 600; font-size: 0.83rem; cursor: pointer; }
+        .btn-save-mini:hover { background: var(--blue-900); }
+
+        .snapshot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem 1.5rem; }
+        .snapshot-item .label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem; }
+        .snapshot-item .value { font-size: 0.92rem; font-weight: 600; }
+
+        .factor-row { margin-bottom: 1.1rem; }
+        .factor-row:last-child { margin-bottom: 0; }
+        .factor-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+        .factor-label { font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+        .factor-tag { font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
+        .factor-tag.positif { background: var(--success-soft); color: var(--success); }
+        .factor-tag.negatif { background: var(--danger-soft); color: var(--danger); }
+        .factor-impact { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
+        .factor-bar-bg { width: 100%; height: 8px; background: var(--bg-light); border-radius: 999px; overflow: hidden; }
+        .factor-bar-fill { height: 100%; border-radius: 999px; }
+        .factor-bar-fill.positif { background: var(--success); }
+        .factor-bar-fill.negatif { background: var(--danger); }
+
+        .shap-img-wrap { text-align: center; margin-bottom: 0.5rem; }
+        .shap-img-wrap img { max-width: 100%; border-radius: 10px; border: 1px solid #ECEFF6; }
+
+        .client-link-row { display: flex; align-items: center; gap: 0.8rem; }
+        .client-link-btn { padding: 0.5rem 1rem; border-radius: 10px; background: var(--blue-soft); color: var(--blue-700); font-weight: 600; font-size: 0.85rem; text-decoration: none; }
+
+        .credits-table { width: 100%; border-collapse: collapse; }
+        .credits-table th { text-align: left; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); padding: 0.6rem 0.8rem; border-bottom: 1px solid #ECEFF6; }
+        .credits-table td { padding: 0.7rem 0.8rem; border-bottom: 1px solid #F3F4F9; font-size: 0.88rem; vertical-align: middle; }
+        .credits-table tr:last-child td { border-bottom: none; }
+        .credits-table .client-link-btn { padding: 0.35rem 0.8rem; font-size: 0.78rem; border-radius: 8px; }
+        .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+        .badge-ok { background: var(--success-soft); color: var(--success); }
+        .badge-ko { background: var(--danger-soft); color: var(--danger); }
+        .credit-status { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; text-transform: capitalize; }
+        .credit-status.en-cours { background: var(--blue-soft); color: var(--blue-700); }
+        .credit-status.solde { background: var(--success-soft); color: var(--success); }
+        .credit-status.en-retard { background: var(--danger-soft); color: var(--danger); }
+        .credit-status.refuse { background: #F0F0F3; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="side-brand">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="CreditWise" class="icon" style="background:none;">
+            <div class="name">CreditWise</div>
+        </div>
+        <div class="side-section-label">Principal</div>
+        <a href="{{ url_for('dashboard') }}" class="side-link">🏠 Tableau de bord</a>
+        <a href="{{ url_for('statistics') }}" class="side-link">📈 Statistiques</a>
+        <a href="{{ url_for('credits_historique') }}" class="side-link active">💳 Historique des crédits</a>
+        <a href="{{ url_for('settings') }}" class="side-link">⚙️ Paramètres</a>
+        <div class="sidebar-footer">
+            <div class="avatar-round">{{ current_user.nom[:2].upper() }}</div>
+            <div>
+                <div class="user-name">{{ current_user.nom }}</div>
+                <div class="user-role">Banquier</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-icon" title="Déconnexion">↪</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <a href="{{ url_for('credits_historique') }}" class="back-btn">←</a>
+            <div>
+                <h1>{{ client.prenom }} {{ client.nom }}</h1>
+                <div class="subtitle">Détail d'une demande de crédit — figé au moment de la décision</div>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background: var(--blue-soft); color: var(--blue-700); padding: 0.7rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.85rem;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="decision-card {{ 'accepted' if credit_entry.decision == 'Accepté' else 'refused' }}">
+            <div class="decision-left">
+                <div class="decision-icon {{ 'accepted' if credit_entry.decision == 'Accepté' else 'refused' }}">
+                    {{ '✓' if credit_entry.decision == 'Accepté' else '✕' }}
+                </div>
+                <div>
+                    <div class="decision-label">Décision du modèle</div>
+                    <div class="decision-value {{ 'accepted' if credit_entry.decision == 'Accepté' else 'refused' }}">{{ credit_entry.decision }}</div>
+                    <div class="decision-date">Demandé le {{ credit_entry.date_demande.strftime('%d/%m/%Y à %H:%M') }}</div>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('update_statut_credit', credit_id=credit_entry.id) }}" class="statut-form">
+                <select name="statut" class="statut-select">
+                    {% for s in ['en cours', 'soldé', 'en retard', 'refusé'] %}
+                    <option value="{{ s }}" {% if credit_entry.statut == s %}selected{% endif %}>{{ s|capitalize }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-save-mini">Mettre à jour le statut</button>
+            </form>
+        </div>
+
+        <div class="client-link-row" style="margin-bottom: 1.2rem;">
+            <a href="{{ url_for('edit_client', client_id=client.id) }}" class="client-link-btn">👤 Voir la fiche actuelle du client</a>
+        </div>
+
+        <!-- Tous les crédits du client -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-icon">🗂️</div>
+                <div class="section-title">Tous les crédits de {{ client.prenom }} {{ client.nom }} ({{ tous_credits|length }})</div>
+            </div>
+            <table class="credits-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Décision</th>
+                        <th>Statut</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in tous_credits %}
+                    <tr>
+                        <td>{{ c.date_demande.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            {% if c.decision == 'Accepté' %}
+                                <span class="badge badge-ok">✓ Accepté</span>
+                            {% else %}
+                                <span class="badge badge-ko">✕ Refusé</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="credit-status {{ c.statut|lower|replace(' ', '-') }}">{{ c.statut }}</span></td>
+                        <td style="text-align: right;">
+                            <a href="{{ url_for('credit_historique_detail', credit_id=c.id, _anchor='details') }}" class="client-link-btn" style="white-space: nowrap;">Voir détails</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Snapshot des données au moment de la décision -->
+        <div class="section-card" id="details">
+            <div class="section-head">
+                <div class="section-icon">📸</div>
+                <div class="section-title">Données utilisées pour cette décision</div>
+            </div>
+            <div class="snapshot-grid">
+                {% for label, value in snapshot.items() %}
+                <div class="snapshot-item">
+                    <div class="label">{{ label }}</div>
+                    <div class="value">{{ value }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+{% extends 'admin/_layout.html' %}
+{% block title %}Comptes analystes{% endblock %}
+
+{% block styles %}
+        .toolbar { display: flex; gap: 0.8rem; align-items: center; margin-bottom: 1.1rem; flex-wrap: wrap; }
+        .search { position: relative; flex: 1; min-width: 240px; }
+        .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+        .search input { width: 100%; padding: 0.68rem 0.9rem 0.68rem 2.5rem; border: 1.5px solid var(--border); border-radius: 11px; font-size: 0.9rem; font-family: 'Inter', sans-serif; background: #fff; outline: none; }
+        .search input:focus { border-color: var(--blue-500); box-shadow: 0 0 0 4px rgba(30,79,196,0.12); }
+        .result-count { font-size: 0.82rem; color: var(--text-muted); }
+        .you { font-size: 0.7rem; font-weight: 600; color: var(--violet); margin-left: 0.3rem; }
+{% endblock %}
+
+{% block topbar %}
+<div class="topbar">
+    <div>
+        <h1>Comptes des analystes</h1>
+        <div class="subtitle">Créez, consultez, modifiez ou supprimez les comptes d'accès à la plateforme</div>
+    </div>
+    <a href="{{ url_for('admin_analyste_create') }}" class="btn btn-primary"><svg width="16" height="16"><use href="#i-user-plus"/></svg> Nouveau compte</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="GET" class="toolbar">
+        <div class="search">
+            <svg width="17" height="17"><use href="#i-search"/></svg>
+            <input type="text" name="q" value="{{ recherche }}" placeholder="Rechercher par nom, email ou agence…" autofocus>
+        </div>
+        <button type="submit" class="btn btn-ghost">Rechercher</button>
+        {% if recherche %}<a href="{{ url_for('admin_analystes') }}" class="btn btn-ghost">Effacer</a>{% endif %}
+    </form>
+    <div class="result-count" style="margin-bottom: 0.6rem;">
+        {{ comptes|length }} compte{{ 's' if comptes|length != 1 }}{% if recherche %} pour « {{ recherche }} »{% endif %}
+    </div>
+
+    {% if comptes %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th>Rôle</th>
+                    <th>Agence</th>
+                    <th>Téléphone</th>
+                    <th>Dossiers</th>
+                    <th>Demandes</th>
+                    <th>Dernière connexion</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in comptes %}
+                {% set st = stats[c.id] %}
+                <tr>
+                    <td>
+                        <div class="person">
+                            <div class="avatar-round {{ 'admin' if c.is_admin }}">{{ c.nom[:2].upper() }}</div>
+                            <div>
+                                <div class="person-name">{{ c.nom }}{% if c.id == current_user.id %}<span class="you">(vous)</span>{% endif %}</div>
+                                <div class="person-sub">{{ c.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if c.is_admin %}<span class="badge badge-admin">Administrateur</span>
+                        {% else %}<span class="badge badge-analyste">Analyste</span>{% endif %}
+                    </td>
+                    <td>{{ c.agence or '—' }}</td>
+                    <td>{{ c.telephone or '—' }}</td>
+                    <td>{{ st.nb_clients }}</td>
+                    <td>{{ st.nb_credits }}</td>
+                    <td>
+                        {% if c.derniere_connexion %}{{ c.derniere_connexion.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}<span class="badge badge-neutral">Jamais</span>{% endif %}
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a href="{{ url_for('admin_analyste_detail', compte_id=c.id) }}" class="icon-btn" title="Consulter"><svg width="16" height="16"><use href="#i-eye"/></svg></a>
+                            <a href="{{ url_for('admin_analyste_edit', compte_id=c.id) }}" class="icon-btn" title="Modifier"><svg width="16" height="16"><use href="#i-edit"/></svg></a>
+                            <button type="button" class="icon-btn danger" title="{{ 'Vous ne pouvez pas supprimer votre propre compte' if c.id == current_user.id else 'Supprimer' }}"
+                                    {% if c.id == current_user.id %}disabled{% endif %}
+                                    onclick='openDelete({{ url_for("admin_analyste_delete", compte_id=c.id)|tojson }}, {{ c.nom|tojson }}, {{ st.nb_clients }}, {{ st.nb_credits }})'>
+                                <svg width="16" height="16"><use href="#i-trash"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">Aucun compte ne correspond à votre recherche.</div>
+    {% endif %}
+</div>
+{% endblock %}

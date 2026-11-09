@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+    <title>CreditWise — Connexion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-900: #14225C;
+            --blue-700: #1A3A8F;
+            --blue-500: #1E4FC4;
+            --blue-soft: #E9EFFC;
+            --bg-light: #F4F6FB;
+            --border: #E3E7F1;
+            --text-primary: #14213D;
+            --text-muted: #8891A8;
+            --success: #17A673;
+            --success-soft: #E4F8F0;
+            --danger: #E24B4A;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            background: var(--bg-light);
+        }
+        svg { display: block; }
+        .auth-wrapper { display: flex; min-height: 100vh; }
+
+        /* ---------- Panneau gauche (bleu) ---------- */
+        .auth-left {
+            flex: 0 0 42%;
+            background:
+                radial-gradient(circle at 85% 10%, rgba(30, 79, 196, 0.55) 0%, transparent 45%),
+                linear-gradient(160deg, var(--blue-700) 0%, var(--blue-900) 100%);
+            color: #fff;
+            padding: 2.8rem 3rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-row { display: flex; align-items: center; gap: 0.8rem; }
+        .brand-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .brand-name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
+        .brand-sub { font-size: 0.78rem; color: rgba(255,255,255,0.65); }
+
+        .left-content { margin: auto 0; padding: 2.5rem 0; position: relative; z-index: 1; }
+        .auth-left h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.1rem;
+            line-height: 1.22;
+            margin: 0 0 1rem;
+            max-width: 460px;
+        }
+        .auth-left p.tagline {
+            color: rgba(255,255,255,0.72);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 0 2rem;
+        }
+        .feature { display: flex; align-items: flex-start; gap: 0.85rem; margin-bottom: 1.1rem; }
+        .feature-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(255,255,255,0.12);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .feature-title { font-size: 0.92rem; font-weight: 600; }
+        .feature-desc { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 0.1rem; }
+
+
+
+        /* ---------- Panneau droit (formulaire) ---------- */
+        .auth-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        .mobile-brand { display: none; }
+        .auth-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 1px 2px rgba(20,34,92,0.04), 0 20px 50px rgba(20,34,92,0.08);
+            padding: 2.4rem 2.2rem;
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .tabs {
+            position: relative;
+            display: flex;
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 1.6rem;
+        }
+        .tab-indicator {
+            position: absolute;
+            top: 4px; bottom: 4px; left: 4px;
+            width: calc(50% - 4px);
+            background: #fff;
+            border-radius: 9px;
+            box-shadow: 0 2px 6px rgba(20,34,92,0.10);
+            transition: transform 0.25s ease;
+        }
+        .tabs.register .tab-indicator { transform: translateX(100%); }
+        .tab-btn {
+            position: relative;
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 0.6rem 0;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .tab-btn.active { color: var(--blue-700); }
+
+        .form-panel { display: none; }
+        .form-panel.active { display: block; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+        label.field-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 1.1rem 0 0.45rem;
+        }
+        .form-panel form > label.field-label:first-child { margin-top: 0; }
+        .input-wrap { position: relative; }
+        .input-icon {
+            position: absolute;
+            left: 13px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.15s ease;
+        }
+        input.field-input {
+            width: 100%;
+            padding: 0.75rem 2.8rem 0.75rem 2.6rem;
+            border: 1.5px solid var(--border);
+            border-radius: 11px;
+            font-size: 0.93rem;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            background: #fff;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        input.field-input::placeholder { color: #A9B0C3; }
+        input.field-input:hover { border-color: #CDD3E3; }
+        input.field-input:focus { border-color: var(--blue-500); box-shadow: 0 0 0 4px rgba(30,79,196,0.12); }
+        .input-wrap:focus-within .input-icon { color: var(--blue-500); }
+
+        .toggle-pw {
+            position: absolute;
+            right: 8px; top: 50%;
+            transform: translateY(-50%);
+            width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .toggle-pw:hover { background: var(--bg-light); color: var(--text-primary); }
+        .toggle-pw .eye-off { display: none; }
+        .toggle-pw.shown .eye-on { display: none; }
+        .toggle-pw.shown .eye-off { display: block; }
+
+        .row-between { display: flex; align-items: center; justify-content: space-between; margin-top: 0.9rem; }
+        .remember { display: flex; align-items: center; gap: 0.45rem; font-size: 0.83rem; color: var(--text-primary); cursor: pointer; user-select: none; }
+        .remember input { width: 16px; height: 16px; accent-color: var(--blue-700); cursor: pointer; margin: 0; }
+        .forgot-link { font-size: 0.83rem; font-weight: 500; color: var(--blue-500); text-decoration: none; }
+        .forgot-link:hover { text-decoration: underline; }
+
+        .pw-hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 0.45rem; }
+        .pw-strength { display: flex; gap: 4px; margin-top: 0.55rem; }
+        .pw-strength span { flex: 1; height: 4px; border-radius: 999px; background: var(--border); transition: background 0.2s ease; }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 1.6rem;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            background: var(--blue-700);
+            color: #fff;
+            border: none;
+            border-radius: 11px;
+            padding: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(26,58,143,0.25);
+            transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+        }
+        .submit-btn:hover { background: var(--blue-900); box-shadow: 0 8px 20px rgba(20,34,92,0.3); }
+        .submit-btn:active { transform: translateY(1px); }
+        .submit-btn .arrow { transition: transform 0.15s ease; }
+        .submit-btn:hover .arrow { transform: translateX(3px); }
+        .submit-btn[disabled] { opacity: 0.75; cursor: wait; }
+        .spinner {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .switch-text { text-align: center; font-size: 0.84rem; color: var(--text-muted); margin-top: 1.3rem; }
+        .switch-text button { background: none; border: none; padding: 0; font: inherit; font-weight: 600; color: var(--blue-500); cursor: pointer; }
+        .switch-text button:hover { text-decoration: underline; }
+
+        .alert {
+            display: flex; align-items: flex-start; gap: 0.55rem;
+            border-radius: 10px;
+            padding: 0.7rem 0.9rem;
+            font-size: 0.84rem;
+            margin-bottom: 1.2rem;
+        }
+        .alert svg { flex-shrink: 0; margin-top: 1px; }
+        .alert-danger { background: #FDEBEC; color: #B3261E; }
+        .alert-success { background: #E7F6EE; color: #157347; }
+        .alert-info { background: var(--blue-soft); color: var(--blue-700); }
+
+
+        @media (max-width: 960px) {
+            .auth-left { display: none; }
+            .mobile-brand {
+                display: flex; align-items: center; gap: 0.7rem;
+                margin-bottom: 1.5rem;
+            }
+            .mobile-brand .brand-icon { background: var(--blue-700); border: none; }
+            .mobile-brand .brand-name { color: var(--text-primary); }
+        }
+        @media (max-width: 480px) {
+            .auth-card { padding: 1.8rem 1.3rem; border-radius: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Icônes réutilisables -->
+<svg width="0" height="0" style="position:absolute">
+    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-2.9 3.9M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7c1.8 0 3.4-.5 4.8-1.3"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7h8M6 12h12M8 17h8"/><circle cx="12" cy="12" r="9"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></symbol>
+</svg>
+
+<div class="auth-wrapper">
+
+    <!-- Panneau gauche -->
+    <div class="auth-left">
+        <div class="brand-row">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="CreditWise" width="46" height="46" style="border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.18);">
+            <div>
+                <div class="brand-name">CreditWise</div>
+                <div class="brand-sub">Plateforme bancaire interne</div>
+            </div>
+        </div>
+
+        <div class="left-content">
+            <h1>Plateforme intelligente d'aide à la décision de crédit</h1>
+            <p class="tagline">Evaluez chaque demande en quelques secondes grâce à un modèle d'IA, avec une explication claire de chaque décision.</p>
+
+            <div class="feature">
+                <div class="feature-icon"><svg width="18" height="18"><use href="#i-chart"/></svg></div>
+                <div>
+                    <div class="feature-title">Analyse des indicateurs clés de défaut</div>
+                    <div class="feature-desc">Décision prise à partir du profil client</div>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon"><svg width="18" height="18"><use href="#i-brain"/></svg></div>
+                <div>
+                    <div class="feature-title">Décisions explicables</div>
+                    <div class="feature-desc">Les facteurs favorables et défavorables détaillés </div>
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon"><svg width="18" height="18"><use href="#i-folder"/></svg></div>
+                <div>
+                    <div class="feature-title">Gestion centralisée des dossiers clients</div>
+                    <div class="feature-desc">Historique complet des demandes de crédit</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Panneau droit -->
+    <div class="auth-right">
+        <div class="mobile-brand">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="CreditWise" width="46" height="46" style="border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.18);">
+            <div class="brand-name">CreditWise</div>
+        </div>
+
+        <div class="auth-card">
+
+            <div class="tabs {{ 'register' if active_tab == 'register' else '' }}" id="tabs" role="tablist">
+                <div class="tab-indicator"></div>
+                <button type="button" class="tab-btn {{ 'active' if active_tab != 'register' else '' }}" id="tab-login-btn" role="tab" onclick="showTab('login')">Connexion</button>
+                <button type="button" class="tab-btn {{ 'active' if active_tab == 'register' else '' }}" id="tab-register-btn" role="tab" onclick="showTab('register')">Inscription</button>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <svg width="16" height="16"><use href="#{{ 'i-shield' if category == 'success' else 'i-alert' }}"/></svg>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Formulaire Connexion -->
+            <div class="form-panel {{ 'active' if active_tab != 'register' else '' }}" id="panel-login">
+                <form method="POST" action="{{ url_for('login') }}" autocomplete="off" onsubmit="setLoading(this)">
+                    <label class="field-label" for="login-email">Email professionnel</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="18" height="18"><use href="#i-mail"/></svg>
+                        <input type="email" name="email" id="login-email" class="field-input" autocomplete="off" placeholder="nom@banque.tn" required>
+                    </div>
+
+                    <label class="field-label" for="login-pw">Mot de passe</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="18" height="18"><use href="#i-lock"/></svg>
+                        <input type="password" name="password" id="login-pw" class="field-input" autocomplete="new-password" placeholder="Votre mot de passe" required>
+                        <button type="button" class="toggle-pw" onclick="togglePw('login-pw', this)" aria-label="Afficher le mot de passe">
+                            <svg class="eye-on" width="18" height="18"><use href="#i-eye"/></svg>
+                            <svg class="eye-off" width="18" height="18"><use href="#i-eye-off"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="row-between">
+                        <label class="remember"><input type="checkbox" name="remember" value="1"> Se souvenir de moi</label>
+                        <a href="{{ url_for('forgot_password') }}" class="forgot-link">Mot de passe oublié ?</a>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span class="btn-label">Se connecter</span>
+                        <svg class="arrow" width="18" height="18"><use href="#i-arrow"/></svg>
+                    </button>
+                </form>
+                <p class="switch-text">Pas encore de compte ? <button type="button" onclick="showTab('register')">Créer un compte</button></p>
+            </div>
+
+            <!-- Formulaire Inscription -->
+            <div class="form-panel {{ 'active' if active_tab == 'register' else '' }}" id="panel-register">
+                <form method="POST" action="{{ url_for('register') }}" autocomplete="off" onsubmit="setLoading(this)">
+                    <label class="field-label" for="register-nom">Nom complet</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="18" height="18"><use href="#i-user"/></svg>
+                        <input type="text" name="nom" id="register-nom" class="field-input" autocomplete="off" placeholder="Prénom Nom" required>
+                    </div>
+
+                    <label class="field-label" for="register-email">Email professionnel</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="18" height="18"><use href="#i-mail"/></svg>
+                        <input type="email" name="email" id="register-email" class="field-input" autocomplete="off" placeholder="nom@banque.tn" required>
+                    </div>
+
+                    <label class="field-label" for="register-pw">Mot de passe</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="18" height="18"><use href="#i-lock"/></svg>
+                        <input type="password" name="password" id="register-pw" class="field-input" autocomplete="new-password" placeholder="Choisissez un mot de passe" required oninput="updateStrength(this.value)">
+                        <button type="button" class="toggle-pw" onclick="togglePw('register-pw', this)" aria-label="Afficher le mot de passe">
+                            <svg class="eye-on" width="18" height="18"><use href="#i-eye"/></svg>
+                            <svg class="eye-off" width="18" height="18"><use href="#i-eye-off"/></svg>
+                        </button>
+                    </div>
+                    <div class="pw-strength" id="pw-strength"><span></span><span></span><span></span><span></span></div>
+                    <div class="pw-hint" id="pw-hint">8 caractères minimum, avec lettres et chiffres.</div>
+
+                    <button type="submit" class="submit-btn">
+                        <span class="btn-label">Créer mon compte</span>
+                        <svg class="arrow" width="18" height="18"><use href="#i-arrow"/></svg>
+                    </button>
+                </form>
+                <p class="switch-text">Déjà inscrit ? <button type="button" onclick="showTab('login')">Se connecter</button></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tab) {
+        document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+        document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+        document.getElementById('tab-login-btn').classList.toggle('active', tab === 'login');
+        document.getElementById('tab-register-btn').classList.toggle('active', tab === 'register');
+        document.getElementById('tabs').classList.toggle('register', tab === 'register');
+    }
+
+    function togglePw(id, btn) {
+        const input = document.getElementById(id);
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.classList.toggle('shown', show);
+        btn.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    }
+
+    function updateStrength(pw) {
+        let score = 0;
+        if (pw.length >= 8) score++;
+        if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+        if (/\d/.test(pw)) score++;
+        if (/[^A-Za-z0-9]/.test(pw) || pw.length >= 12) score++;
+        const colors = ['#E24B4A', '#F0A13A', '#1E4FC4', '#17A673'];
+        const labels = ['Faible', 'Moyen', 'Bon', 'Excellent'];
+        document.querySelectorAll('#pw-strength span').forEach((bar, i) => {
+            bar.style.background = pw && i < score ? colors[score - 1] : '';
+        });
+        document.getElementById('pw-hint').textContent = pw
+            ? 'Sécurité : ' + (labels[score - 1] || 'Très faible')
+            : '8 caractères minimum, avec lettres et chiffres.';
+    }
+
+    function setLoading(form) {
+        const btn = form.querySelector('.submit-btn');
+        btn.disabled = true;
+        btn.querySelector('.arrow').outerHTML = '<span class="spinner"></span>';
+        btn.querySelector('.btn-label').textContent = 'Veuillez patienter…';
+    }
+</script>
+
+</body>
+</html>

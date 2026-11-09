@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+    <title>CreditWise — Historique des crédits</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-900: #14225C; --blue-700: #1A3A8F; --blue-500: #1E4FC4; --blue-soft: #E9EFFC;
+            --bg-light: #F4F6FB; --text-primary: #14213D; --text-muted: #8891A8;
+            --success: #17A673; --success-soft: #E4F8F0;
+            --danger: #E24B4A; --danger-soft: #FCEBEB;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Inter', sans-serif; color: var(--text-primary); background: var(--bg-light); }
+        .layout { display: flex; min-height: 100vh; }
+
+        .sidebar { width: 240px; background: #fff; border-right: 1px solid #ECEFF6; padding: 1.5rem 1.2rem; display: flex; flex-direction: column; }
+        .side-brand { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2rem; }
+        .side-brand .icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .side-brand .name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; }
+        .side-section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text-muted); text-transform: uppercase; margin: 1rem 0 0.5rem 0.3rem; }
+        .side-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 10px; color: var(--text-primary); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+        .side-link.active { background: var(--blue-700); color: #fff; }
+        .side-link:not(.active):hover { background: var(--bg-light); }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid #ECEFF6; display: flex; align-items: center; gap: 0.6rem; }
+        .avatar-round { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 0.85rem; font-weight: 600; }
+        .user-role { font-size: 0.75rem; color: var(--text-muted); }
+        .logout-icon { margin-left: auto; color: var(--text-muted); text-decoration: none; }
+
+        .main { flex: 1; padding: 1.8rem 2.2rem; }
+        .topbar h1 { font-family: 'Poppins', sans-serif; font-size: 1.4rem; margin: 0; }
+        .topbar .subtitle { color: var(--text-muted); font-size: 0.88rem; margin-top: 0.2rem; margin-bottom: 1.8rem; }
+
+        /* ---------- Toolbar (recherche + filtres) ---------- */
+        .toolbar { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; align-items: center; }
+        .search-input {
+            flex: 1; padding: 0.65rem 1rem; border-radius: 10px; border: 1.5px solid #E3E7F1;
+            font-size: 0.88rem; outline: none; background: #fff;
+        }
+        .search-input:focus { border-color: var(--blue-500); }
+        .filter-tabs { display: flex; background: #fff; border-radius: 10px; padding: 4px; box-shadow: 0 2px 8px rgba(20,34,92,0.04); }
+        .filter-btn {
+            border: none; background: transparent; padding: 0.5rem 1rem; border-radius: 8px;
+            font-size: 0.83rem; font-weight: 600; color: var(--text-muted); cursor: pointer;
+        }
+        .filter-btn.active { background: var(--blue-700); color: #fff; }
+
+        .table-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 16px rgba(20,34,92,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            text-align: left; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase;
+            color: var(--text-muted); padding: 0.9rem 1rem; border-bottom: 1px solid #ECEFF6;
+        }
+        tbody td { padding: 0.85rem 1rem; border-bottom: 1px solid #F3F4F9; font-size: 0.88rem; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: var(--bg-light); }
+
+        .client-cell { display: flex; align-items: center; gap: 0.7rem; }
+        .client-name { font-weight: 600; }
+        .client-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+        .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+        .badge-ok { background: var(--success-soft); color: var(--success); }
+        .badge-ko { background: var(--danger-soft); color: var(--danger); }
+
+        .credit-status {
+            display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem;
+            border-radius: 999px; text-transform: capitalize;
+        }
+        .credit-status.en-cours { background: var(--blue-soft); color: var(--blue-700); }
+        .credit-status.solde { background: var(--success-soft); color: var(--success); }
+        .credit-status.en-retard { background: var(--danger-soft); color: var(--danger); }
+        .credit-status.refuse { background: #F0F0F3; color: var(--text-muted); }
+
+        .link-btn {
+            padding: 0.35rem 0.8rem; border-radius: 8px; background: var(--blue-soft); color: var(--blue-700);
+            font-size: 0.78rem; font-weight: 600; text-decoration: none; white-space: nowrap;
+        }
+
+        .count-pill { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; background: var(--bg-light); color: var(--text-primary); }
+
+        .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="side-brand">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="CreditWise" class="icon" style="background:none;">
+            <div class="name">CreditWise</div>
+        </div>
+        <div class="side-section-label">Principal</div>
+        <a href="{{ url_for('dashboard') }}" class="side-link">🏠 Tableau de bord</a>
+        <a href="{{ url_for('statistics') }}" class="side-link">📈 Statistiques</a>
+        <a href="{{ url_for('credits_historique') }}" class="side-link active">💳 Historique des crédits</a>
+        <a href="{{ url_for('settings') }}" class="side-link">⚙️ Paramètres</a>
+        <div class="sidebar-footer">
+            <div class="avatar-round">{{ current_user.nom[:2].upper() }}</div>
+            <div>
+                <div class="user-name">{{ current_user.nom }}</div>
+                <div class="user-role">Banquier</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-icon" title="Déconnexion">↪</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <h1>Historique des crédits</h1>
+            <div class="subtitle">Toutes les demandes de crédit évaluées par le modèle, pour tous vos clients</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background: var(--blue-soft); color: var(--blue-700); padding: 0.7rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.85rem;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="toolbar">
+            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un client (nom, MSISDN, code banque...)" oninput="filterTable()">
+            <div class="filter-tabs">
+                <button class="filter-btn active" data-filter="tous" onclick="setFilter('tous', this)">Tous</button>
+                <button class="filter-btn" data-filter="accepte" onclick="setFilter('accepte', this)">Acceptés</button>
+                <button class="filter-btn" data-filter="refuse" onclick="setFilter('refuse', this)">Refusés</button>
+            </div>
+        </div>
+
+        <div class="table-card">
+            {% if credits %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Dernière demande</th>
+                        <th>Demandes</th>
+                        <th>Dernière décision</th>
+                        <th>Statut</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="creditsBody">
+                    {% for c in credits %}
+                    {% set statut_filtre = 'accepte' if c.decision == 'Accepté' else 'refuse' %}
+                    {% set initiales = (c.client.prenom[:1] ~ c.client.nom[:1])|upper %}
+                    <tr data-statut="{{ statut_filtre }}" data-search="{{ (c.client.prenom ~ ' ' ~ c.client.nom ~ ' ' ~ (c.client.msisdn or '') ~ ' ' ~ (c.client.bankcode or ''))|lower }}">
+                        <td>
+                            <div class="client-cell">
+                                <div class="avatar-round" style="background: var(--blue-700);">{{ initiales }}</div>
+                                <div>
+                                    <div class="client-name">{{ c.client.prenom }} {{ c.client.nom }}</div>
+                                    <div class="client-sub">{{ c.client.msisdn or '—' }} · {{ c.client.bankcode or '—' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ c.date_demande.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td><span class="count-pill">{{ nb_demandes[c.client_id] }} crédit{{ 's' if nb_demandes[c.client_id] > 1 }}</span></td>
+                        <td>
+                            {% if c.decision == 'Accepté' %}
+                                <span class="badge badge-ok">✓ Accepté</span>
+                            {% else %}
+                                <span class="badge badge-ko">✕ Refusé</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="credit-status {{ c.statut|lower|replace(' ', '-') }}">{{ c.statut }}</span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('credit_historique_detail', credit_id=c.id) }}" class="link-btn">↗ Voir le détail</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">Aucune demande de crédit évaluée pour le moment.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentFilter = 'tous';
+
+    function setFilter(filter, btn) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterTable();
+    }
+
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#creditsBody tr');
+        rows.forEach(row => {
+            const matchesFilter = currentFilter === 'tous' || row.dataset.statut === currentFilter;
+            const matchesSearch = row.dataset.search.includes(search);
+            row.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>

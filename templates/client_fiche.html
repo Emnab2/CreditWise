@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+    <title>CreditWise — {{ client.prenom }} {{ client.nom }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-900: #14225C; --blue-700: #1A3A8F; --blue-500: #1E4FC4; --blue-soft: #E9EFFC;
+            --bg-light: #F4F6FB; --text-primary: #14213D; --text-muted: #8891A8;
+            --success: #17A673; --success-soft: #E4F8F0;
+            --danger: #E24B4A; --danger-soft: #FCEBEB;
+            --decide-purple: #76369b; --decide-purple-soft: #e3cbf4;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Inter', sans-serif; color: var(--text-primary); background: var(--bg-light); }
+        .layout { display: flex; min-height: 100vh; }
+
+        .sidebar { width: 240px; background: #fff; border-right: 1px solid #ECEFF6; padding: 1.5rem 1.2rem; display: flex; flex-direction: column; }
+        .side-brand { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2rem; }
+        .side-brand .icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .side-brand .name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; }
+        .side-section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text-muted); text-transform: uppercase; margin: 1rem 0 0.5rem 0.3rem; }
+        .side-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 10px; color: var(--text-primary); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+        .side-link.active { background: var(--blue-700); color: #fff; }
+        .side-link:not(.active):hover { background: var(--bg-light); }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid #ECEFF6; display: flex; align-items: center; gap: 0.6rem; }
+        .avatar-round { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 0.85rem; font-weight: 600; }
+        .user-role { font-size: 0.75rem; color: var(--text-muted); }
+        .logout-icon { margin-left: auto; color: var(--text-muted); text-decoration: none; }
+
+        .main { flex: 1; padding: 1.8rem 2.2rem; }
+        .topbar { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1.8rem; }
+        .back-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--blue-soft); border: none; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; color: var(--blue-700); text-decoration: none; }
+        .topbar h1 { font-family: 'Poppins', sans-serif; font-size: 1.35rem; margin: 0; }
+        .topbar .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.15rem; }
+
+        .section-card { background: #fff; border-radius: 16px; padding: 1.6rem; box-shadow: 0 4px 16px rgba(20,34,92,0.05); margin-bottom: 1.2rem; }
+        .section-head { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid #ECEFF6; justify-content: space-between; }
+        .section-head-left { display: flex; align-items: center; gap: 0.8rem; }
+        .section-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-soft); color: var(--blue-700); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .section-icon.credit { background: var(--decide-purple-soft); color: var(--decide-purple); }
+        .section-title { font-weight: 600; font-size: 0.98rem; }
+        .section-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem 1.6rem; }
+        .info-item .label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.3rem; }
+        .info-item .value { font-size: 0.95rem; font-weight: 600; }
+        .info-item .value.muted { color: var(--text-muted); font-weight: 500; }
+
+        .btn-edit { padding: 0.5rem 1rem; border-radius: 10px; background: var(--blue-soft); color: var(--blue-700); font-weight: 600; font-size: 0.83rem; text-decoration: none; }
+
+        .decide-card { background: var(--decide-purple-soft); border: 1.5px dashed var(--decide-purple); border-radius: 14px; padding: 1.1rem 1.3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; }
+        .decide-text { font-size: 0.85rem; color: #76369b; }
+        .decide-text strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; color: var(--text-primary); }
+        .btn-decide { background: var(--decide-purple); color: #fff; border: none; padding: 0.75rem 1.4rem; border-radius: 10px; font-weight: 600; font-size: 0.87rem; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
+        .btn-decide:hover { filter: brightness(0.95); }
+
+        .credit-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+        .credit-table th { text-align: left; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em; color: var(--text-muted); text-transform: uppercase; padding: 0.5rem 0.6rem; border-bottom: 1.5px solid #ECEFF6; }
+        .credit-table td { padding: 0.65rem 0.6rem; border-bottom: 1px solid #ECEFF6; }
+        .credit-table tr:last-child td { border-bottom: none; }
+        .credit-empty { font-size: 0.85rem; color: var(--text-muted); padding: 0.8rem 0; }
+        .btn-detail-mini { padding: 0.35rem 0.8rem; border-radius: 8px; background: var(--blue-soft); color: var(--blue-700); font-size: 0.78rem; font-weight: 600; text-decoration: none; }
+        .btn-delete-mini { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.78rem; font-weight: 600; padding: 0.2rem 0.4rem; }
+        .btn-delete-mini:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="side-brand">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="CreditWise" class="icon" style="background:none;">
+            <div class="name">CreditWise</div>
+        </div>
+        <div class="side-section-label">Principal</div>
+        <a href="{{ url_for('dashboard') }}" class="side-link">🏠 Tableau de bord</a>
+        <a href="{{ url_for('statistics') }}" class="side-link">📈 Statistiques</a>
+        <a href="{{ url_for('credits_historique') }}" class="side-link">💳 Historique des crédits</a>
+        <a href="{{ url_for('settings') }}" class="side-link">⚙️ Paramètres</a>
+        <div class="sidebar-footer">
+            <div class="avatar-round">{{ current_user.nom[:2].upper() }}</div>
+            <div>
+                <div class="user-name">{{ current_user.nom }}</div>
+                <div class="user-role">Banquier</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-icon" title="Déconnexion">↪</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <a href="{{ url_for('dashboard') }}" class="back-btn">←</a>
+            <div>
+                <h1>{{ client.prenom }} {{ client.nom }}</h1>
+                <div class="subtitle">Fiche client</div>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background: var(--blue-soft); color: var(--blue-700); padding: 0.7rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.85rem;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Informations personnelles -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-left">
+                    <div class="section-icon">👤</div>
+                    <div class="section-title">Informations personnelles</div>
+                </div>
+                <a href="{{ url_for('edit_client', client_id=client.id) }}" class="btn-edit">✎ Modifier</a>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="label">Prénom</div>
+                    <div class="value">{{ client.prenom }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Nom</div>
+                    <div class="value">{{ client.nom }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Identifiant client (MSISDN)</div>
+                    <div class="value {{ 'muted' if not client.msisdn }}">{{ client.msisdn or 'Non renseigné' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Code banque</div>
+                    <div class="value {{ 'muted' if not client.bankcode }}">{{ client.bankcode or 'Non renseigné' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Téléphone</div>
+                    <div class="value {{ 'muted' if not client.telephone }}">{{ client.telephone or 'Non renseigné' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Agence</div>
+                    <div class="value {{ 'muted' if not client.agence }}">{{ client.agence or 'Non renseignée' }}</div>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <div class="label">Adresse</div>
+                    <div class="value {{ 'muted' if not client.adresse }}">{{ client.adresse or 'Non renseignée' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton nouvelle demande de crédit -->
+        <div class="decide-card">
+            <div class="decide-text">
+                <strong>Nouvelle demande de crédit</strong>
+                Accéder au dossier complet du client pour lancer une évaluation par le modèle.
+            </div>
+            <a href="{{ url_for('edit_client', client_id=client.id, new_credit=1) }}" class="btn-decide">🤖 Nouvelle demande de crédit</a>
+        </div>
+
+        <!-- Historique des crédits -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-left">
+                    <div class="section-icon credit">💳</div>
+                    <div>
+                        <div class="section-title">Historique des crédits</div>
+                        <div class="section-sub">Toutes les demandes de crédit passées de ce client</div>
+                    </div>
+                </div>
+            </div>
+
+            {% if client.credits_historique %}
+            <table class="credit-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Décision</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in client.credits_historique %}
+                    <tr>
+                        <td>{{ c.date_demande.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            {% if c.decision == 'Accepté' %}
+                                <span style="background: var(--success-soft); color: var(--success); padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600;">✓ Accepté</span>
+                            {% else %}
+                                <span style="background: var(--danger-soft); color: var(--danger); padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600;">✕ Refusé</span>
+                            {% endif %}
+                        </td>
+                        <td style="display:flex; gap: 0.6rem; align-items:center;">
+                            <a href="{{ url_for('credit_historique_detail', credit_id=c.id) }}" class="btn-detail-mini">Voir le détail</a>
+                            <form method="POST" action="{{ url_for('delete_credit', credit_id=c.id) }}" style="display:inline;">
+                                <button type="submit" class="btn-delete-mini" onclick="return confirm('Supprimer cette entrée de l\'historique ?');">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="credit-empty">Aucune demande de crédit enregistrée pour ce client pour le moment. Cliquez sur "Nouvelle demande de crédit" pour commencer.</div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

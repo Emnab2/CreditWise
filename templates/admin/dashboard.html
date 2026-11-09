@@ -1,0 +1,219 @@
+{% extends 'admin/_layout.html' %}
+{% block title %}Supervision{% endblock %}
+
+{% block styles %}
+        .grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.4rem; }
+        @media (max-width: 1100px) { .grid-2 { grid-template-columns: 1fr; } }
+        .chart-box { position: relative; height: 260px; }
+        .legend { display: flex; gap: 1rem; font-size: 0.78rem; color: var(--text-muted); }
+        .legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+        .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+        .split { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: #ECEFF6; margin: 0.4rem 0 1rem; }
+        .split div { height: 100%; }
+        .split-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .split-item { background: var(--bg-light); border-radius: 12px; padding: 0.8rem 0.9rem; }
+        .split-item .v { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.25rem; }
+        .split-item .l { font-size: 0.76rem; color: var(--text-muted); }
+
+        .feed { list-style: none; margin: 0; padding: 0; }
+        .feed li { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0; border-bottom: 1px solid #F3F4F9; }
+        .feed li:last-child { border-bottom: none; }
+        .feed-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .feed-dot.ok { background: var(--success-soft); color: var(--success); }
+        .feed-dot.ko { background: var(--danger-soft); color: var(--danger); }
+        .feed-text { font-size: 0.84rem; line-height: 1.4; flex: 1; min-width: 0; }
+        .feed-text .muted { font-size: 0.76rem; }
+        .feed-date { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+{% endblock %}
+
+{% block topbar %}
+<div class="topbar">
+    <div>
+        <h1>Supervision de la plateforme</h1>
+        <div class="subtitle">Vue d'ensemble de l'activité des analystes de crédit</div>
+    </div>
+    <a href="{{ url_for('admin_analyste_create') }}" class="btn btn-primary"><svg width="16" height="16"><use href="#i-user-plus"/></svg> Nouveau compte</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="kpi-grid">
+    <div class="kpi">
+        <div class="kpi-icon violet"><svg width="20" height="20"><use href="#i-users"/></svg></div>
+        <div>
+            <div class="kpi-value">{{ nb_analystes }}</div>
+            <div class="kpi-label">Analyste{{ 's' if nb_analystes != 1 }}</div>
+            <div class="kpi-sub">{{ actifs_30j }} connecté{{ 's' if actifs_30j != 1 }} ces 30 derniers jours</div>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-icon blue"><svg width="20" height="20"><use href="#i-folder"/></svg></div>
+        <div>
+            <div class="kpi-value">{{ nb_clients }}</div>
+            <div class="kpi-label">Dossiers clients</div>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-icon orange"><svg width="20" height="20"><use href="#i-file"/></svg></div>
+        <div>
+            <div class="kpi-value">{{ nb_credits }}</div>
+            <div class="kpi-label">Demandes évaluées</div>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-icon green"><svg width="20" height="20"><use href="#i-check-circle"/></svg></div>
+        <div>
+            <div class="kpi-value">{{ taux_acceptation }}%</div>
+            <div class="kpi-label">Taux d'acceptation</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-head">
+            <div>
+                <div class="card-title">Demandes évaluées par mois</div>
+                <div class="card-desc">6 derniers mois, toutes agences confondues</div>
+            </div>
+            <div class="legend">
+                <span><i style="background: #17A673"></i>Acceptées</span>
+                <span><i style="background: #E24B4A"></i>Refusées</span>
+            </div>
+        </div>
+        <div class="chart-box"><canvas id="chartMois"></canvas></div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <div>
+                <div class="card-title">Décisions du modèle</div>
+                <div class="card-desc">Sur l'ensemble des demandes</div>
+            </div>
+        </div>
+        {% set pct_ok = (acceptes / nb_credits * 100) if nb_credits else 0 %}
+        <div class="split">
+            <div style="width: {{ pct_ok }}%; background: var(--success);"></div>
+            <div style="width: {{ 100 - pct_ok if nb_credits else 0 }}%; background: var(--danger);"></div>
+        </div>
+        <div class="split-legend">
+            <div class="split-item">
+                <div class="v" style="color: var(--success)">{{ acceptes }}</div>
+                <div class="l">Acceptée{{ 's' if acceptes != 1 }}</div>
+            </div>
+            <div class="split-item">
+                <div class="v" style="color: var(--danger)">{{ refuses }}</div>
+                <div class="l">Refusée{{ 's' if refuses != 1 }}</div>
+            </div>
+        </div>
+
+        <div class="card-title" style="margin-top: 1.4rem;">Dernières évaluations</div>
+        {% if derniers_credits %}
+        <ul class="feed">
+            {% for c in derniers_credits[:5] %}
+            <li>
+                <div class="feed-dot {{ 'ok' if c.decision == 'Accepté' else 'ko' }}">
+                    <svg width="15" height="15"><use href="#{{ 'i-check' if c.decision == 'Accepté' else 'i-alert' }}"/></svg>
+                </div>
+                <div class="feed-text">
+                    <div><strong>{{ c.client.prenom }} {{ c.client.nom }}</strong> · {{ c.decision }}</div>
+                    <div class="muted">par {{ c.client.banquier.nom }}</div>
+                </div>
+                <div class="feed-date">{{ c.date_demande.strftime('%d/%m %H:%M') }}</div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty">Aucune demande évaluée pour le moment.</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-head">
+        <div>
+            <div class="card-title">Activité par analyste</div>
+            <div class="card-desc">Classement par nombre de demandes évaluées</div>
+        </div>
+        <a href="{{ url_for('admin_analystes') }}" class="btn btn-ghost">Gérer les comptes</a>
+    </div>
+    {% if lignes %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Analyste</th>
+                    <th>Agence</th>
+                    <th>Dossiers</th>
+                    <th>Demandes</th>
+                    <th>Taux d'acceptation</th>
+                    <th>Dernière demande</th>
+                    <th>Dernière connexion</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in lignes %}
+                {% set a = l.analyste %}
+                <tr>
+                    <td>
+                        <div class="person">
+                            <div class="avatar-round">{{ a.nom[:2].upper() }}</div>
+                            <div>
+                                <div class="person-name">{{ a.nom }}</div>
+                                <div class="person-sub">{{ a.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ a.agence or '—' }}</td>
+                    <td>{{ l.nb_clients }}</td>
+                    <td>{{ l.nb_credits }}</td>
+                    <td>
+                        {% if l.taux_acceptation is not none %}
+                        <div class="rate">
+                            <div class="rate-track"><div class="rate-fill" style="width: {{ l.taux_acceptation }}%"></div></div>
+                            <span>{{ l.taux_acceptation }}%</span>
+                        </div>
+                        {% else %}<span class="muted">—</span>{% endif %}
+                    </td>
+                    <td>{{ l.derniere_demande.strftime('%d/%m/%Y') if l.derniere_demande else '—' }}</td>
+                    <td>
+                        {% if a.derniere_connexion %}{{ a.derniere_connexion.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}<span class="badge badge-neutral">Jamais</span>{% endif %}
+                    </td>
+                    <td><div class="actions"><a href="{{ url_for('admin_analyste_detail', compte_id=a.id) }}" class="icon-btn" title="Consulter"><svg width="16" height="16"><use href="#i-eye"/></svg></a></div></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">Aucun analyste pour le moment. <a href="{{ url_for('admin_analyste_create') }}" style="color: var(--blue-500); font-weight: 600;">Créer un compte</a></div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    new Chart(document.getElementById('chartMois'), {
+        type: 'bar',
+        data: {
+            labels: {{ mois_labels|tojson }},
+            datasets: [
+                { label: 'Acceptées', data: {{ mois_acceptes|tojson }}, backgroundColor: '#17A673', borderRadius: 6, maxBarThickness: 26 },
+                { label: 'Refusées', data: {{ mois_refuses|tojson }}, backgroundColor: '#E24B4A', borderRadius: 6, maxBarThickness: 26 }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { stacked: true, grid: { display: false }, ticks: { color: '#8891A8' } },
+                y: { stacked: true, beginAtZero: true, ticks: { precision: 0, color: '#8891A8' }, grid: { color: '#F0F2F7' } }
+            }
+        }
+    });
+</script>
+{% endblock %}

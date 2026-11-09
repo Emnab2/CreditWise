@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+    <title>CreditWise — Statistiques</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --blue-900: #14225C; --blue-700: #1A3A8F; --blue-500: #1E4FC4; --blue-soft: #E9EFFC;
+            --bg-light: #F4F6FB; --text-primary: #14213D; --text-muted: #8891A8;
+            --success: #17A673; --success-soft: #E4F8F0;
+            --danger: #E24B4A; --danger-soft: #FCEBEB;
+            --chart-purple: #8B6BF2;
+            --chart-teal: #2ED9C3;
+            --chart-amber: #F5A623;
+            --chart-pink: #F26BA8;
+            --chart-gray: #DCE0F0;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Inter', sans-serif; color: var(--text-primary); background: var(--bg-light); }
+        .layout { display: flex; min-height: 100vh; }
+
+        .sidebar { width: 240px; background: #fff; border-right: 1px solid #ECEFF6; padding: 1.5rem 1.2rem; display: flex; flex-direction: column; }
+        .side-brand { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2rem; }
+        .side-brand .icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .side-brand .name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; }
+        .side-section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text-muted); text-transform: uppercase; margin: 1rem 0 0.5rem 0.3rem; }
+        .side-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 10px; color: var(--text-primary); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+        .side-link.active { background: var(--blue-700); color: #fff; }
+        .side-link:not(.active):hover { background: var(--bg-light); }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid #ECEFF6; display: flex; align-items: center; gap: 0.6rem; }
+        .avatar-round { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 0.85rem; font-weight: 600; }
+        .user-role { font-size: 0.75rem; color: var(--text-muted); }
+        .logout-icon { margin-left: auto; color: var(--text-muted); text-decoration: none; }
+
+        .main { flex: 1; padding: 1.8rem 2.2rem; }
+        .topbar h1 { font-family: 'Poppins', sans-serif; font-size: 1.4rem; margin: 0; }
+        .topbar .subtitle { color: var(--text-muted); font-size: 0.88rem; margin-top: 0.2rem; margin-bottom: 1.8rem; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.6rem; }
+        .stat-card { background: #fff; border-radius: 16px; padding: 1.2rem; box-shadow: 0 4px 16px rgba(20,34,92,0.05); }
+        .stat-value { font-family: 'Poppins', sans-serif; font-size: 1.7rem; font-weight: 700; }
+        .stat-label { font-size: 0.83rem; color: var(--text-muted); }
+        .stat-value.success { color: var(--success); }
+        .stat-value.danger { color: var(--danger); }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+        .chart-card { background: #fff; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 16px rgba(20,34,92,0.05); }
+        .chart-card h3 { font-family: 'Poppins', sans-serif; font-size: 1rem; margin: 0 0 1.2rem; }
+        .chart-wrap { position: relative; height: 260px; }
+
+        .shap-card img { max-width: 100%; border-radius: 10px; }
+        .empty-note { color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem; }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="side-brand">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="CreditWise" class="icon" style="background:none;">
+            <div class="name">CreditWise</div>
+        </div>
+        <div class="side-section-label">Principal</div>
+        <a href="{{ url_for('dashboard') }}" class="side-link">🏠 Tableau de bord</a>
+        <a href="{{ url_for('statistics') }}" class="side-link active">📈 Statistiques</a>
+        <a href="{{ url_for('credits_historique') }}" class="side-link ">💳 Historique des crédits</a>
+       
+        <a href="{{ url_for('settings') }}" class="side-link">⚙️ Paramètres</a>
+        <div class="sidebar-footer">
+            <div class="avatar-round">{{ current_user.nom[:2].upper() }}</div>
+            <div>
+                <div class="user-name">{{ current_user.nom }}</div>
+                <div class="user-role">Banquier</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-icon" title="Déconnexion">↪</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <h1>Statistiques</h1>
+            <div class="subtitle">Vue d'ensemble de vos dossiers clients</div>
+        </div>
+
+        {% if total == 0 %}
+        <div class="chart-card">
+            <p class="empty-note">Aucun client pour l'instant. Les statistiques apparaîtront dès que vous aurez ajouté et évalué des dossiers.</p>
+        </div>
+        {% else %}
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value">{{ total }}</div>
+                <div class="stat-label">Total clients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value success">{{ taux_acceptation }}%</div>
+                <div class="stat-label">Taux d'acceptation</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value success">{{ acceptes }}</div>
+                <div class="stat-label">Acceptés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value danger">{{ refuses }}</div>
+                <div class="stat-label">Refusés</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="chart-card">
+                <h3>Répartition des décisions</h3>
+                <div class="chart-wrap"><canvas id="chartDecisions"></canvas></div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Clients par ville</h3>
+                <div class="chart-wrap"><canvas id="chartVilles"></canvas></div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="chart-card">
+                <h3>Répartition par type de contrat</h3>
+                <div class="chart-wrap"><canvas id="chartContrats"></canvas></div>
+            </div>
+
+            <div class="chart-card shap-card">
+                <h3>Importance globale des facteurs (modèle Naive Bayes)</h3>
+                <img src="{{ url_for('static', filename='summary_plot.png') }}" alt="Importance des facteurs SHAP">
+            </div>
+        </div>
+
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    {% if total > 0 %}
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#8891A8';
+
+    // ---------- Décisions : donut ----------
+    new Chart(document.getElementById('chartDecisions'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Acceptés', 'Refusés', 'Non évalués'],
+            datasets: [{
+                data: [{{ acceptes }}, {{ refuses }}, {{ non_evalues }}],
+                backgroundColor: ['#17A673', '#E24B4A', '#DCE0F0'],
+                borderWidth: 0,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 16, usePointStyle: true, pointStyle: 'circle' } } }
+        }
+    });
+
+    // ---------- Villes : barres fines et colorées ----------
+    const villesLabels = {{ villes.keys()|list|tojson }};
+    const villesData = {{ villes.values()|list|tojson }};
+    const paletteVilles = ['#1A3A8F', '#8B6BF2', '#2ED9C3', '#F5A623', '#F26BA8'];
+
+    new Chart(document.getElementById('chartVilles'), {
+        type: 'bar',
+        data: {
+            labels: villesLabels,
+            datasets: [{
+                data: villesData,
+                backgroundColor: villesLabels.map((_, i) => paletteVilles[i % paletteVilles.length]),
+                borderRadius: 8,
+                maxBarThickness: 28
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#F0EEFA' } }
+            }
+        }
+    });
+
+    // ---------- Contrats : polar area (plus créatif qu'une barre) ----------
+    const contratsLabels = {{ contrats.keys()|list|tojson }};
+    const contratsData = {{ contrats.values()|list|tojson }};
+    const paletteContrats = ['#8B6BF2', '#2ED9C3', '#F5A623', '#F26BA8', '#1A3A8F'];
+
+    new Chart(document.getElementById('chartContrats'), {
+        type: 'polarArea',
+        data: {
+            labels: contratsLabels,
+            datasets: [{
+                data: contratsData,
+                backgroundColor: contratsLabels.map((_, i) => paletteContrats[i % paletteContrats.length] + 'CC'),
+                borderWidth: 0
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 16, usePointStyle: true, pointStyle: 'circle' } } },
+            scales: { r: { grid: { color: '#F0EEFA' }, ticks: { display: false } } }
+        }
+    });
+    {% endif %}
+</script>
+
+</body>
+</html>

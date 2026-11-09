@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+    <title>CreditWise — Paramètres</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-900: #14225C; --blue-700: #1A3A8F; --blue-500: #1E4FC4; --blue-soft: #E9EFFC;
+            --bg-light: #F4F6FB; --text-primary: #14213D; --text-muted: #8891A8;
+            --success: #17A673; --success-soft: #E4F8F0;
+            --danger: #E24B4A; --danger-soft: #FCEBEB;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Inter', sans-serif; color: var(--text-primary); background: var(--bg-light); }
+        .layout { display: flex; min-height: 100vh; }
+
+        .sidebar { width: 240px; background: #fff; border-right: 1px solid #ECEFF6; padding: 1.5rem 1.2rem; display: flex; flex-direction: column; }
+        .side-brand { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2rem; }
+        .side-brand .icon { width: 38px; height: 38px; border-radius: 10px; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .side-brand .name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; }
+        .side-section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text-muted); text-transform: uppercase; margin: 1rem 0 0.5rem 0.3rem; }
+        .side-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 10px; color: var(--text-primary); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+        .side-link.active { background: var(--blue-700); color: #fff; }
+        .side-link:not(.active):hover { background: var(--bg-light); }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid #ECEFF6; display: flex; align-items: center; gap: 0.6rem; }
+        .avatar-round { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-700); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; }
+        .user-name { font-size: 0.85rem; font-weight: 600; }
+        .user-role { font-size: 0.75rem; color: var(--text-muted); }
+        .logout-icon { margin-left: auto; color: var(--text-muted); text-decoration: none; }
+
+        .main { flex: 1; padding: 1.8rem 2.2rem; }
+        .topbar h1 { font-family: 'Poppins', sans-serif; font-size: 1.4rem; margin: 0; }
+        .topbar .subtitle { color: var(--text-muted); font-size: 0.88rem; margin-top: 0.2rem; margin-bottom: 1.8rem; }
+
+        .alert { display: flex; align-items: center; gap: 0.55rem; padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 1.2rem; font-size: 0.86rem; font-weight: 500; }
+        .alert svg { flex-shrink: 0; }
+        .alert-success { background: var(--success-soft); color: #0F7A55; }
+        .alert-danger { background: var(--danger-soft); color: #B3261E; }
+
+        .settings-grid { display: grid; grid-template-columns: 300px 1fr; gap: 1.4rem; align-items: start; }
+        @media (max-width: 1050px) { .settings-grid { grid-template-columns: 1fr; } }
+
+        .card { background: #fff; border-radius: 16px; padding: 1.6rem; box-shadow: 0 1px 2px rgba(20,34,92,0.04), 0 4px 16px rgba(20,34,92,0.05); margin-bottom: 1.4rem; }
+        .card-head { display: flex; align-items: flex-start; gap: 0.85rem; margin-bottom: 1.3rem; padding-bottom: 1.1rem; border-bottom: 1px solid #ECEFF6; }
+        .card-icon { width: 40px; height: 40px; border-radius: 11px; background: var(--blue-soft); color: var(--blue-700); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .card-icon.danger { background: var(--danger-soft); color: var(--danger); }
+        .card-title { font-weight: 600; font-size: 1rem; }
+        .card-desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+        /* ---------- Carte profil (colonne gauche) ---------- */
+        .profile-card { padding: 0; overflow: hidden; position: sticky; top: 1.5rem; }
+        .profile-cover { height: 84px; background: radial-gradient(circle at 85% 0%, rgba(43,91,215,0.9), transparent 60%), linear-gradient(135deg, var(--blue-700), var(--blue-900)); }
+        .profile-body { padding: 0 1.5rem 1.5rem; text-align: center; }
+        .profile-avatar {
+            width: 84px; height: 84px; margin: -42px auto 0.8rem; border-radius: 50%;
+            background: linear-gradient(135deg, #2B5BD7, var(--blue-900)); color: #fff;
+            border: 4px solid #fff; box-shadow: 0 6px 16px rgba(20,34,92,0.18);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; font-weight: 700; font-family: 'Poppins', sans-serif;
+        }
+        .profile-name { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.12rem; }
+        .profile-email { font-size: 0.84rem; color: var(--text-muted); margin-top: 0.15rem; word-break: break-all; }
+        .profile-badge { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.7rem; background: var(--blue-soft); color: var(--blue-700); font-size: 0.74rem; font-weight: 600; padding: 0.25rem 0.7rem; border-radius: 999px; }
+        .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-top: 1.3rem; }
+        .stat-box { background: var(--bg-light); border-radius: 12px; padding: 0.8rem 0.5rem; }
+        .stat-value { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--blue-700); }
+        .stat-label { font-size: 0.73rem; color: var(--text-muted); margin-top: 0.1rem; }
+        .profile-meta { margin-top: 1.2rem; text-align: left; border-top: 1px solid #ECEFF6; padding-top: 1rem; }
+        .meta-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.84rem; padding: 0.35rem 0; }
+        .meta-row svg { color: var(--text-muted); flex-shrink: 0; }
+        .meta-row .empty { color: var(--text-muted); font-style: italic; }
+
+        /* ---------- Formulaires ---------- */
+        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.4rem; }
+        @media (max-width: 640px) { .form-row-2 { grid-template-columns: 1fr; } }
+        .field { margin-bottom: 1.1rem; }
+        .field-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.45rem; }
+        .input-wrap { position: relative; }
+        .input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; transition: color 0.15s ease; }
+        .field-input {
+            width: 100%; padding: 0.7rem 0.9rem 0.7rem 2.5rem; border: 1.5px solid #E3E7F1; border-radius: 11px;
+            font-size: 0.9rem; font-family: 'Inter', sans-serif; color: var(--text-primary); background: #fff; outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .field-input::placeholder { color: #A9B0C3; }
+        .field-input:hover { border-color: #CDD3E3; }
+        .field-input:focus { border-color: var(--blue-500); box-shadow: 0 0 0 4px rgba(30,79,196,0.12); }
+        .input-wrap:focus-within .input-icon { color: var(--blue-500); }
+        .field-input.pw { padding-right: 2.8rem; }
+        .field-input.is-error { border-color: var(--danger); }
+        .field-input.is-ok { border-color: var(--success); }
+
+        .toggle-pw { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: none; border: none; border-radius: 8px; cursor: pointer; color: var(--text-muted); }
+        .toggle-pw:hover { background: var(--bg-light); color: var(--text-primary); }
+        .toggle-pw .eye-off { display: none; }
+        .toggle-pw.shown .eye-on { display: none; }
+        .toggle-pw.shown .eye-off { display: block; }
+
+        .pw-rules { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 1rem; margin: 0 0 1.1rem; padding: 0.85rem 1rem; background: var(--bg-light); border-radius: 11px; }
+        @media (max-width: 640px) { .pw-rules { grid-template-columns: 1fr; } }
+        .pw-rule { display: flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; color: var(--text-muted); transition: color 0.15s ease; }
+        .pw-rule .dot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #C5CBDA; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s ease; }
+        .pw-rule .dot svg { opacity: 0; }
+        .pw-rule.ok { color: #0F7A55; }
+        .pw-rule.ok .dot { background: var(--success); border-color: var(--success); }
+        .pw-rule.ok .dot svg { opacity: 1; }
+        .match-msg { font-size: 0.78rem; margin-top: 0.4rem; min-height: 1em; }
+
+        .form-actions { display: flex; justify-content: flex-end; gap: 0.7rem; padding-top: 1.1rem; margin-top: 0.3rem; border-top: 1px solid #ECEFF6; }
+        .btn-primary { display: inline-flex; align-items: center; gap: 0.45rem; background: var(--blue-700); color: #fff; border: none; padding: 0.7rem 1.3rem; border-radius: 10px; font-weight: 600; font-size: 0.87rem; font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.15s ease; box-shadow: 0 4px 12px rgba(26,58,143,0.2); }
+        .btn-primary:hover { background: var(--blue-900); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+        .btn-ghost { background: transparent; color: var(--text-muted); border: 1.5px solid #E3E7F1; padding: 0.65rem 1.1rem; border-radius: 10px; font-weight: 600; font-size: 0.87rem; font-family: 'Inter', sans-serif; cursor: pointer; }
+        .btn-ghost:hover:not(:disabled) { color: var(--text-primary); border-color: #CDD3E3; }
+        .btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .session-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+        .session-text { font-size: 0.86rem; color: var(--text-muted); max-width: 440px; line-height: 1.5; }
+        .btn-logout { background: var(--danger-soft); color: var(--danger); border: none; padding: 0.7rem 1.3rem; border-radius: 10px; font-weight: 600; font-size: 0.87rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem; transition: all 0.15s ease; }
+        .btn-logout:hover { background: var(--danger); color: #fff; }
+    </style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></symbol>
+    <symbol id="i-bank" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5M4 10h16M6 10v8M10 10v8M14 10v8M18 10v8M3 20h18"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 9.2-9.2M17 6l3 3M14 9l2 2"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-2.9 3.9M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7c1.8 0 3.4-.5 4.8-1.3"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+</svg>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="side-brand">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="CreditWise" class="icon" style="background:none;">
+            <div class="name">CreditWise</div>
+        </div>
+        <div class="side-section-label">Principal</div>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin_dashboard') }}" class="side-link">📊 Activité</a>
+        <a href="{{ url_for('admin_analystes') }}" class="side-link">👥 Analystes</a>
+        {% else %}
+        <a href="{{ url_for('dashboard') }}" class="side-link">🏠 Tableau de bord</a>
+        <a href="{{ url_for('statistics') }}" class="side-link">📈 Statistiques</a>
+        <a href="{{ url_for('credits_historique') }}" class="side-link">💳 Historique des crédits</a>
+        {% endif %}
+
+        <a href="{{ url_for('settings') }}" class="side-link active">⚙️ Paramètres</a>
+        <div class="sidebar-footer">
+            <div class="avatar-round">{{ current_user.nom[:2].upper() }}</div>
+            <div>
+                <div class="user-name">{{ current_user.nom }}</div>
+                <div class="user-role">{{ 'Administrateur' if current_user.is_admin else 'Banquier' }}</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-icon" title="Déconnexion">↪</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <h1>Paramètres</h1>
+            <div class="subtitle">Gérez votre profil et la sécurité de votre compte</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <svg width="17" height="17"><use href="#{{ 'i-check' if category == 'success' else 'i-alert' }}"/></svg>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% set nb_credits = current_user.clients | map(attribute='credits_historique') | map('length') | sum %}
+
+        <div class="settings-grid">
+
+            <!-- Colonne gauche : résumé du profil -->
+            <div class="card profile-card">
+                <div class="profile-cover"></div>
+                <div class="profile-body">
+                    <div class="profile-avatar">{{ current_user.nom[:2].upper() }}</div>
+                    <div class="profile-name">{{ current_user.nom }}</div>
+                    <div class="profile-email">{{ current_user.email }}</div>
+                    <div class="profile-badge"><svg width="13" height="13"><use href="#i-bank"/></svg> {{ 'Administrateur' if current_user.is_admin else 'Banquier' }}</div>
+
+                    <div class="profile-stats">
+                        <div class="stat-box">
+                            <div class="stat-value">{{ nb_clients }}</div>
+                            <div class="stat-label">Dossier{{ 's' if nb_clients != 1 }} géré{{ 's' if nb_clients != 1 }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">{{ nb_credits }}</div>
+                            <div class="stat-label">Demande{{ 's' if nb_credits != 1 }} évaluée{{ 's' if nb_credits != 1 }}</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-meta">
+                        <div class="meta-row">
+                            <svg width="16" height="16"><use href="#i-phone"/></svg>
+                            {% if current_user.telephone %}<span>{{ current_user.telephone }}</span>{% else %}<span class="empty">Téléphone non renseigné</span>{% endif %}
+                        </div>
+                        <div class="meta-row">
+                            <svg width="16" height="16"><use href="#i-bank"/></svg>
+                            {% if current_user.agence %}<span>{{ current_user.agence }}</span>{% else %}<span class="empty">Agence non renseignée</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite : formulaires -->
+            <div>
+                <!-- Informations personnelles -->
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-icon"><svg width="19" height="19"><use href="#i-user"/></svg></div>
+                        <div>
+                            <div class="card-title">Informations personnelles</div>
+                            <div class="card-desc">Ces informations apparaissent sur votre profil.</div>
+                        </div>
+                    </div>
+                    <form method="POST" id="profile-form">
+                        <input type="hidden" name="action" value="update_profile">
+                        <div class="form-row-2">
+                            <div class="field">
+                                <label class="field-label" for="nom">Nom complet</label>
+                                <div class="input-wrap">
+                                    <svg class="input-icon" width="17" height="17"><use href="#i-user"/></svg>
+                                    <input type="text" name="nom" id="nom" class="field-input" value="{{ current_user.nom }}" required>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="field-label" for="email">Adresse email</label>
+                                <div class="input-wrap">
+                                    <svg class="input-icon" width="17" height="17"><use href="#i-mail"/></svg>
+                                    <input type="email" name="email" id="email" class="field-input" value="{{ current_user.email }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row-2">
+                            <div class="field">
+                                <label class="field-label" for="telephone">Numéro de téléphone</label>
+                                <div class="input-wrap">
+                                    <svg class="input-icon" width="17" height="17"><use href="#i-phone"/></svg>
+                                    <input type="tel" name="telephone" id="telephone" class="field-input" value="{{ current_user.telephone or '' }}" placeholder="Ex : 21 600 000">
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="field-label" for="agence">Agence</label>
+                                <div class="input-wrap">
+                                    <svg class="input-icon" width="17" height="17"><use href="#i-bank"/></svg>
+                                    <input type="text" name="agence" id="agence" class="field-input" value="{{ current_user.agence or '' }}" placeholder="Ex : Agence Tunis Centre">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="reset" class="btn-ghost" id="profile-reset" disabled>Annuler</button>
+                            <button type="submit" class="btn-primary" id="profile-save" disabled>
+                                <svg width="16" height="16"><use href="#i-check"/></svg> Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sécurité -->
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-icon"><svg width="19" height="19"><use href="#i-key"/></svg></div>
+                        <div>
+                            <div class="card-title">Sécurité</div>
+                            <div class="card-desc">Modifiez votre mot de passe de connexion.</div>
+                        </div>
+                    </div>
+                    <form method="POST" id="pw-form">
+                        <input type="hidden" name="action" value="change_password">
+                            <div class="field">
+                                <label class="field-label" for="ancien_pw">Mot de passe actuel</label>
+                                <div class="input-wrap">
+                                    <svg class="input-icon" width="17" height="17"><use href="#i-lock"/></svg>
+                                    <input type="password" name="ancien_password" id="ancien_pw" class="field-input pw" placeholder="Votre mot de passe actuel" autocomplete="new-password" required>
+                                    <button type="button" class="toggle-pw" onclick="togglePw('ancien_pw', this)" aria-label="Afficher le mot de passe">
+                                        <svg class="eye-on" width="17" height="17"><use href="#i-eye"/></svg>
+                                        <svg class="eye-off" width="17" height="17"><use href="#i-eye-off"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        <div class="form-row-2">
+                            <div class="field">
+                                <label class="field-label" for="nouveau_pw">Nouveau mot de passe</label>
+                                <div class="input-wrap">
+                                    <svg class="input-icon" width="17" height="17"><use href="#i-lock"/></svg>
+                                    <input type="password" name="nouveau_password" id="nouveau_pw" class="field-input pw" placeholder="Nouveau mot de passe" autocomplete="new-password" required oninput="checkPw()">
+                                    <button type="button" class="toggle-pw" onclick="togglePw('nouveau_pw', this)" aria-label="Afficher le mot de passe">
+                                        <svg class="eye-on" width="17" height="17"><use href="#i-eye"/></svg>
+                                        <svg class="eye-off" width="17" height="17"><use href="#i-eye-off"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="field-label" for="confirm_pw">Confirmer le mot de passe</label>
+                                <div class="input-wrap">
+                                    <svg class="input-icon" width="17" height="17"><use href="#i-lock"/></svg>
+                                    <input type="password" name="confirmation_password" id="confirm_pw" class="field-input pw" placeholder="Retapez le mot de passe" autocomplete="new-password" required oninput="checkPw()">
+                                    <button type="button" class="toggle-pw" onclick="togglePw('confirm_pw', this)" aria-label="Afficher le mot de passe">
+                                        <svg class="eye-on" width="17" height="17"><use href="#i-eye"/></svg>
+                                        <svg class="eye-off" width="17" height="17"><use href="#i-eye-off"/></svg>
+                                    </button>
+                                </div>
+                                <div class="match-msg" id="match-msg"></div>
+                            </div>
+                        </div>
+                        <div class="pw-rules">
+                            <div class="pw-rule" data-rule="len"><span class="dot"><svg width="10" height="10" color="#fff"><use href="#i-check"/></svg></span>8 caractères minimum</div>
+                            <div class="pw-rule" data-rule="upper"><span class="dot"><svg width="10" height="10" color="#fff"><use href="#i-check"/></svg></span>Une majuscule</div>
+                            <div class="pw-rule" data-rule="lower"><span class="dot"><svg width="10" height="10" color="#fff"><use href="#i-check"/></svg></span>Une minuscule</div>
+                            <div class="pw-rule" data-rule="digit"><span class="dot"><svg width="10" height="10" color="#fff"><use href="#i-check"/></svg></span>Un chiffre</div>
+                            <div class="pw-rule" data-rule="special"><span class="dot"><svg width="10" height="10" color="#fff"><use href="#i-check"/></svg></span>Un caractère spécial (!@#$%…)</div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary" id="pw-save" disabled>
+                                <svg width="16" height="16"><use href="#i-lock"/></svg> Modifier le mot de passe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Session -->
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-icon danger"><svg width="19" height="19"><use href="#i-logout"/></svg></div>
+                        <div>
+                            <div class="card-title">Session</div>
+                            <div class="card-desc">Gérez votre connexion à CreditWise.</div>
+                        </div>
+                    </div>
+                    <div class="session-row">
+                        <div class="session-text">Pensez à vous déconnecter lorsque vous quittez votre poste, surtout sur un ordinateur partagé.</div>
+                        <a href="{{ url_for('logout') }}" class="btn-logout">
+                            <svg width="16" height="16"><use href="#i-logout"/></svg> Se déconnecter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePw(id, btn) {
+        const input = document.getElementById(id);
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.classList.toggle('shown', show);
+    }
+
+    // Profil : boutons actifs seulement s'il y a une modification
+    (function () {
+        const form = document.getElementById('profile-form');
+        const fields = form.querySelectorAll('.field-input');
+        const initial = Array.from(fields, f => f.value);
+        const refresh = () => {
+            const changed = Array.from(fields).some((f, i) => f.value !== initial[i]);
+            document.getElementById('profile-save').disabled = !changed;
+            document.getElementById('profile-reset').disabled = !changed;
+        };
+        form.addEventListener('input', refresh);
+        form.addEventListener('reset', () => setTimeout(refresh));
+    })();
+
+    // Sécurité : mêmes règles que password_utils.valider_mot_de_passe
+    const RULES = {
+        len: pw => pw.length >= 8,
+        upper: pw => /[A-Z]/.test(pw),
+        lower: pw => /[a-z]/.test(pw),
+        digit: pw => /[0-9]/.test(pw),
+        special: pw => /[!@#$%^&*(),.?":{}|<>]/.test(pw),
+    };
+    function checkPw() {
+        const pw = document.getElementById('nouveau_pw').value;
+        const confirm = document.getElementById('confirm_pw');
+        let allOk = true;
+        for (const [name, test] of Object.entries(RULES)) {
+            const ok = test(pw);
+            allOk = allOk && ok;
+            document.querySelector('.pw-rule[data-rule="' + name + '"]').classList.toggle('ok', ok);
+        }
+        const msg = document.getElementById('match-msg');
+        const match = confirm.value !== '' && confirm.value === pw;
+        confirm.classList.toggle('is-ok', match);
+        confirm.classList.toggle('is-error', confirm.value !== '' && !match);
+        msg.textContent = confirm.value === '' ? '' : (match ? 'Les mots de passe correspondent.' : 'Les mots de passe ne correspondent pas.');
+        msg.style.color = match ? 'var(--success)' : 'var(--danger)';
+        document.getElementById('pw-save').disabled = !(allOk && match);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function (alertEl) {
+            setTimeout(function () {
+                alertEl.style.transition = 'opacity 0.5s ease';
+                alertEl.style.opacity = '0';
+                setTimeout(function () {
+                    alertEl.remove();
+                }, 500);
+            }, 3000);
+        });
+    });
+</script>
+
+</body>
+</html>
